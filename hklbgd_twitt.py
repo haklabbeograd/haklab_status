@@ -1,7 +1,6 @@
 import serial
 import sys
 import threading
-import time
 import twitter
 from auth import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
 
@@ -29,9 +28,8 @@ def post_status(message):
 
 if __name__ == "__main__":
     timer = None
-    last_update_time = 0
 
-    srl = serial.Serial(port, 9600, timeout=10)
+    srl = serial.Serial(SERIAL_PORT, 9600, timeout=10)
 
     while True:
         try:
@@ -42,9 +40,8 @@ if __name__ == "__main__":
             continue
 
         msg = OPEN_MSG if unlocked else CLOSE_MSG
-        diff = time.time() - last_update_time
 
-        if timer is not None and diff < TIMEOUT:
+        if timer is not None and timer.is_alive():
             # if someone changes states 2 times isinde the TIMEOUT
             # then cancel tweeting
             timer.cancel()
@@ -53,4 +50,3 @@ if __name__ == "__main__":
             timer = threading.Timer(TIMEOUT, post_status, args=(msg))
             timer.start() # start timing and tweet when TIMEOUT expires
             sys.stdout.write("timer started, tweeting in %d seconds" % TIMEOUT)
-        last_update_time = time.time()
