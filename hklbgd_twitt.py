@@ -23,7 +23,7 @@ def post_status(message):
         api.PostUpdate(message)
         sys.stdout.write("tweet sent - %s " % message)
     except Exception as e:
-        sys.stdout.write(e)
+        sys.stderr.write(str(e))
 
 
 
@@ -35,11 +35,12 @@ if __name__ == "__main__":
 
     while True:
         try:
-            # read from serial
-            # receive "1" when unlocked and "0" when locked
+            # read from serial - receive "1" when unlocked, "0" when locked
             unlocked = bool(int(srl.readline()))
-        except:
+        except Exception as e:
+            sys.stderr.write(str(e))
             continue
+
         msg = OPEN_MSG if unlocked else CLOSE_MSG
         diff = time.time() - last_update_time
 
