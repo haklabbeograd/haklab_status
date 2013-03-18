@@ -1,3 +1,11 @@
+"""
+This script and the arduino image should be rewritten to a
+request-reply model where the arduino would hold the serial port
+and take requests from different clients.
+This way more devices could be attached to the arduino and different
+clients could read data from the devices connected by querying the arduino.
+
+"""
 import serial
 import sys
 import threading
