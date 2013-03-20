@@ -54,6 +54,8 @@ if __name__ == "__main__":
     counter = 0 # in case of > 3 times fail, send DM to admins
 
     srl = serial.Serial(SERIAL_PORT, 9600)
+    srl.flushInput()
+    srl.flushOutput()
 
     while True:
         try:
