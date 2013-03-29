@@ -1,0 +1,5 @@
+python-twitter
+distribute
+simplejson
+oauth2
+httplib2
