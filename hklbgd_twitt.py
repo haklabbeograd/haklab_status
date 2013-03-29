@@ -6,7 +6,7 @@ This way more devices could be attached to the arduino and different
 clients could read data from the devices connected by querying the arduino.
 
 """
-import datetime
+import time
 import serial
 import sys
 import threading
@@ -16,7 +16,7 @@ from auth import (CONSUMER_KEY, CONSUMER_SECRET,
 
 
 
-SERIAL_PORT = "/dev/ttyUSB0"
+SERIAL_PORT = "/dev/ttyACM0"
 TIMEOUT = 600
 OPEN_MSG = "Hklbgd je otkljucan."
 CLOSE_MSG = "Hklbgd je zakljucan."
@@ -28,24 +28,29 @@ API = twitter.Api(consumer_key=CONSUMER_KEY,
         access_token_secret=ACCESS_TOKEN_SECRET)
 
 
+def fhwrite(text):
+	fh = open("hklbgd.log",'a')
+	fh.write(text + "\n")
+	fh.close()
+
+
 def post_status(message):
     try:
-        message = "%s %s" % (datetime.datetime.now(), message)
-        print(message)
+        message = time.strftime("%Y-%m-%d %H:%M ") + message
+        fhwrite(message)
         API.PostUpdate(message)
-        print("tweet sent - %s " % message)
+        fhwrite("tweet sent - %s " % message)
     except Exception as e:
-        print(str(e))
-
+        fhwrite(str(e))
 
 
 def send_direct_messages(message):
     try:
         for user in ADMINS:
             API.PostDirectMessage(user, message)
-        print("DM sent - %s " % message)
+        fhwrite("DM sent - %s " % message)
     except Exception as e:
-        print(str(e))
+        fhwrite(str(e))
 
 
 
@@ -61,14 +66,14 @@ if __name__ == "__main__":
         try:
             # read from serial - receive "1" when unlocked, "0" when locked
             unlocked = bool(int(srl.readline()))
-            print("read from serial | unlocked=%s" % unlocked)
+            fhwrite("read from serial | unlocked=%s" % unlocked)
             counter = 0
         except Exception as e:
             if counter > 3:
                 send_direct_messages("FAIL!!! - %s" % e)
                 break
             else:
-                print(str(e))
+                fhwrite(str(e))
                 counter += 1
                 continue
 
@@ -78,8 +83,8 @@ if __name__ == "__main__":
             # if someone changes states 2 times isinde the TIMEOUT
             # then cancel tweetpsurd', ' mishkez'ing
             timer.cancel()
-            print("timeout not elapsed - TWITTER ABORT")
+            fhwrite("timeout not elapsed - TWITTER ABORT")
         else:
             timer = threading.Timer(TIMEOUT, post_status, args=(msg,))
             timer.start() # start timing and tweet when TIMEOUT expires
-            print("timer started, tweeting in %d seconds" % TIMEOUT)
+            fhwrite("timer started, tweeting in %d seconds" % TIMEOUT)
