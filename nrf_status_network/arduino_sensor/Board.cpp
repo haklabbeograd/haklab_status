@@ -132,9 +132,8 @@ boolean registerBoard(RF24 radioX)
             byte k = 1;
             if(writePackage(&k, 1,radioX))       //send back 1 over def channel for ack
             {
-                //registered = true;
                 Serial.println("\nApplied");
-                //timerA = millis();              //start deffinition timer
+                return true;
             }
             else
             {//failed to send ack go back to application
@@ -154,7 +153,6 @@ boolean registerBoard(RF24 radioX)
         Serial.println("\nError 1");
         return false;
     }
-    return true;
 }
 
 boolean defineBoard(boolean * registered, RF24 radioX)
