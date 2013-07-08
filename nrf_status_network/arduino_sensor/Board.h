@@ -6,7 +6,7 @@
 typedef enum {BOOL,U_CHAR, S_CHAR, U_INT16, S_INT16, UL_INT32, SL_INT32,FLOAT, DOUBLE } DATATYPE;
 typedef enum {SENSOR, ACTUATOR} S_OR_A;
 
-#define APPLICATION_CH 10
+#define REGISTRATION_CH 10
 #define DEFINITION_CH  20
 #define SIZE_OF_NAME    20
 
@@ -25,7 +25,7 @@ typedef enum {SENSOR, ACTUATOR} S_OR_A;
 #define SENSOR2_NSA         1
 #define SENSOR2_SORA        SENSOR
 
-
+extern 
 
 
 
@@ -33,8 +33,9 @@ typedef enum {SENSOR, ACTUATOR} S_OR_A;
 boolean readPackage(void * package,unsigned char len, RF24 radioX);
 boolean readPackageAck(byte * package, unsigned char len, byte * ack, unsigned char lenAck, RF24 radioX);
 boolean writePackage(void * package, unsigned char len, RF24 radioX);
-void packBoard(byte * package);
-void packSenAct(unsigned char n, byte * package);
-boolean applyBoard(RF24 radioX);
+void packBoard();
+void packSenAct(unsigned char n);
+boolean registerBoard(RF24 radioX);
+boolean defineBoard(boolean * registered, unsigned long timerA, radio RF24);
 
 #endif

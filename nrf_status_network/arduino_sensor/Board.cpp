@@ -6,6 +6,9 @@ unsigned char SenActNdata[BOARD_NSENACT] = {SENSOR1_NDATA,SENSOR2_NDATA};
 S_OR_A  SenActSoRa[BOARD_NSENACT] = {SENSOR1_SORA,SENSOR2_SORA};
 unsigned char SenActNSA[BOARD_NSENACT] = {SENSOR1_NSA,SENSOR2_NSA};
 
+byte packageTot[BOARD_NSENACT][32];
+byte BoardPack[32];
+
 boolean readPackage(void * package,unsigned char len, RF24 radioX)
 {
     unsigned long started_waiting_at = millis();
@@ -47,23 +50,22 @@ boolean writePackage(void * package, unsigned char len, RF24 radioX)
     return temp;    
 }
 
-void packBoard(byte * package)
+void packBoard()
 {
   int i =0;
   char * name = BOARD_NAME;
   unsigned char nSenAct = BOARD_NSENACT;
-  //for(i = 0; i < SIZE_OF_NAME; i++)package[i] = (byte) name[i];
-  while(name[i])
+  while((name[i])&&(i < SIZE_OF_NAME))
   {
-      package[i] = (byte) name[i];
+      boardPack[i] = (byte) name[i];
       i++;
   }
   while(SIZE_OF_NAME - i)
   {
-      package[i++] = 0;
+      boardPack[i++] = 0;
   }
   
-  package[SIZE_OF_NAME]=(byte)nSenAct;
+  boardPack[SIZE_OF_NAME]=(byte)nSenAct;
   
   while(31-i)
   {
@@ -72,7 +74,7 @@ void packBoard(byte * package)
 }
 
 
-void packSenAct(unsigned char n, byte * package)
+void packSenAct(unsigned char n)
 {
     int i =0;
     /*
@@ -82,167 +84,103 @@ void packSenAct(unsigned char n, byte * package)
     package[i++]=(byte)SenActSoRa[n];
     package[i]=(byte)SenActNSA[n];
     */
-    
     while(SenActNames[n][i]&&((SIZE_OF_NAME-i)>0))
     {
-      package[i] = (byte) SenActNames[n][i];
+        
+      packageTot[n][i] = (byte) SenActNames[n][i];
       i++;
     }
     while((SIZE_OF_NAME - i)>0)
     {
-      package[i++] = 0;
+      packageTot[n][i++] = 0;
     }
   
-    package[SIZE_OF_NAME]=(byte)SenActTypes[n];
+    packageTot[n][SIZE_OF_NAME]=(byte)SenActTypes[n];
     //Serial.print(package[SIZE_OF_NAME]);
-    package[SIZE_OF_NAME + 1]=(byte)SenActNdata[n];
+    packageTot[n][SIZE_OF_NAME + 1]=(byte)SenActNdata[n];
     //Serial.print(package[SIZE_OF_NAME + 1]);
-    package[SIZE_OF_NAME + 2]=(byte)SenActSoRa[n];
+    packageTot[n][SIZE_OF_NAME + 2]=(byte)SenActSoRa[n];
     //Serial.print(package[SIZE_OF_NAME + 2]);
-    package[SIZE_OF_NAME + 3]=(byte)SenActNSA[n];
+    packageTot[n][SIZE_OF_NAME + 3]=(byte)SenActNSA[n];
     //Serial.print(package[SIZE_OF_NAME + 3]);
     //Serial.println((byte)SenActNSA[n], DEC);
     
     i+=3;
     while(31-i)
     {
-      package[++i] = 0;
+      packageTot[n][++i] = 0;
     }
     
 }
 
-boolean applyBoard(RF24 radioX)
+//SenActs keep sending their Board packages, server can read only one at a time.
+//When the server reads one, it sends the same package back as ack...
+//since all boards names are different, only the one that sent it will get it back
+boolean registerBoard(RF24 radioX)
 {
-    byte packageT[3][32];
-    packBoard(packageT[0]);
-    for(int i = 0; i < BOARD_NSENACT; i++)
+    radiradioX.flush_tx();
+    //Send board package
+    if(writePackage(boardPack, 32, radioX))
     {
-        packSenAct(i, packageT[i+1]);
-    }
-    byte package[32];
-    byte k = 1;
-    boolean connected = false;
-    boolean error = false;
-    while(!connected)
-    {
-        radioX.setChannel( APPLICATION_CH );
-        if(writePackage(packageT[0],32,radioX))
-        {
-            if(readPackageAck(package,32,packageT[0],32,radioX))
+        byte testP[32];
+        //read the response back and check against board package
+        if(readPackageAck(testP, 32,boardPack,32,radioX))
+        {   
+            radioX.setChannel( DEFINITION_CH );  //change channel to definition chanel
+            byte k = 1;
+            if(writePackage(&k, 1,radioX))       //send back 1 over def channel for ack
             {
-                radioX.setChannel( DEFINITION_CH );
-                if(writePackage(&k, 1,radioX))
-                {
-                    for(int i = 0; i < BOARD_NSENACT; i++)
-                    {
-                        delay(10);
-                        if(readPackageAck(package,1,&k,1,radioX))
-                        {
-                            if(writePackage(packageT[i + 1],32,radioX));
-                            else
-                            {
-                                error = true;
-                                Serial.println("Error 4");
-                            }
-                        }
-                        else
-                        {
-                            error = true;
-                            Serial.println("Error 3");
-                        }
-                    }
-                    if(!error)connected = true;
-                }
-                else
-                {
-                    Serial.println("Error 2");
-                }
+                //registered = true;
+                Serial.println("\nApplied");
+                //timerA = millis();              //start deffinition timer
             }
             else
-            {
-                Serial.println("Error 1");
+            {//failed to send ack go back to application
+                radio.setChannel( REGISTRATION_CH );
+                Serial.println("\nError 3");
+                return false;
             }
         }
         else
-        {
-            Serial.println("Error 0");
+        {//failed the pack ack, go back to applictaio
+            Serial.println("\nError 2");
+            return false;
         }
     }
-    return true;    
+    else
+    {//failed to write, try again :)
+        Serial.println("\nError 1");
+        return false;
+    }
+    return true;
 }
 
-
-/*
-boolean applyBoard(RF24 radioX)
-{
-    byte packageT[3][32];
-    packBoard(packageT[0]);
-    Serial.println((char*)packageT[0]);
-    for(int i = 0; i < BOARD_NSENACT; i++)
-    {
-        packSenAct(i, packageT[i+1]);
-    }
-    byte package[32];
-    Serial.println("apply board");
-    Serial.println((char*)packageT[0]);
-    radioX.setChannel( APPLICATION_CH );
-    if(writePackage(packageT[0], 32, radioX))
-    {
-        if(readPackage(package, 32,radioX))
-        {
-            boolean temp = true;
-            for(int i = 0; i < 32; i++)
-            {
-                if(packageT[0][i] != package[i])boolean temp = false;
-            }
-            if(temp)
-            {
-                radioX.setChannel( DEFINITION_CH );
-                for(int j = 0; j < BOARD_NSENACT; j++)
-                {   
-                    delay(100);                 
-                    if(readPackage(package, 1,radioX))
-                    {
-                        if((unsigned char)package[0] == 1)
-                        {
-                            //packSenAct(j, package);
-                            //writePackage(package, 32, radioX);
-                            if(writePackage(packageT[j+1], 32, radioX))
-                            {
-                            }
-                            else
-                            {
-                                Serial.println("Error 5");
-                                Serial.println(j);
-                                return 0;
-                            }
-                        }
-                        else
-                        {
-                            Serial.println("Error 4");
-                            return 0;
-                        }
-                    }
-                    else
-                    {
-                        Serial.println("Error 3");
-                        return 0;
-                    }
-                }
-            }
+boolean defineBoard(boolean * registered, unsigned long timerA, radio RF24)
+{   //if allready registered continue with defining
+    byte k;
+    if(readPackage(&k, 1,radio))
+    {//read command from server
+        if(k == 0xff)
+        {//connected...
+            Serial.println("Connected");
+            return true;
+        }
+        if(k == 0xf0)
+        {//new channel setup...
+        }                
+        if(k < 0xf0)
+        {   //send SenAct package #k to server
+            if(writePackage(packageTot[k], 32, radio))
+                Serial.println("\nSent #k SenACt");
             else
-            {
-                Serial.println("Error 1");
-                return 0;
+            {//failed to send #k senact package
+                Serial.println("\nError in sending k pack");
             }
         }
-        else
-        {
-            Serial.println("Error 0");
-            return 0;
-        }
-        return 1;
     }
-    return 0;
+    else
+    {// failed to read command
+        Serial.println("\nError in read command");
+    }
+    return false;
 }
-*/

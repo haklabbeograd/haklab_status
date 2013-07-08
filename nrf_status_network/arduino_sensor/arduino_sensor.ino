@@ -28,9 +28,10 @@ DHT dht(DHTPIN, DHTTYPE);
 
 RF24 radio(9,10);
 boolean connected = false;
-boolean applied = false;
-byte packageTot[BOARD_NSENACT][32];
-byte package[32];
+boolean registered = false;
+//byte packageTot[BOARD_NSENACT][32];
+//byte package[32];
+
 unsigned long timerA;
 // Radio pipe addresses for the 2 nodes to communicate.
 const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
@@ -46,7 +47,7 @@ void setup(void)
   dht.begin();
   // optionally, increase the delay between retries & # of retries
   radio.setRetries(15,15);
-  radio.setChannel( APPLICATION_CH );
+  radio.setChannel( REGISTRATION_CH );
 
   // optionally, reduce the payload size.  seems to
   // improve reliability
@@ -58,10 +59,10 @@ void setup(void)
   //
   // Start listening
   //
-    packBoard(package);
+    packBoard();
     for(int i = 0; i < BOARD_NSENACT; i++)
     {
-        packSenAct(i, packageTot[i]);
+        packSenAct(i);
     }
     radio.startListening();
     radio.printDetails();
@@ -76,20 +77,46 @@ void loop()
         if(millis()-timerA > 5000)
             {
                 connected = false;
-                radio.setChannel( APPLICATION_CH );
+                radio.setChannel( REGISTRATION_CH );
                 Serial.println("\nTimer Conn has gone");
             }
     }
     else
     {//if not connected senact needs to apply and define
-        if(applied)
-        {//if allready applied continue with defining
+        if(registered)
+        {
+            if(connected = defineBoard(&registered, &TimerA, radio))
+            {
+                registered = false;
+                timerA = millis();//TEST
+            }
+            //Definition timer
+            //goes back to register mode, if not connected within 5s
+            if(millis()-timerA > 5000)
+            {
+                registered = false;
+                radio.setChannel( REGISTRATION_CH );
+                Serial.println("\nTimer has gone");
+            }
+        }
+        else
+        {
+            if(registerBoard(RF24 radioX))
+            {
+                registered = true;
+                timerA = millis();
+            }
+        }
+    }
+}
+
+/*{   //if allready registered continue with defining
             byte k;
             if(readPackage(&k, 1,radio))
             {//read command from server
                 if(k == 0xff)
                 {//connected...
-                    applied = false;
+                    registered = false;
                     connected = true;
                     Serial.println("Connected");
                     timerA = millis(); //TEST
@@ -116,50 +143,14 @@ void loop()
             //goes back to apply mode, if not connected within 5s
             if(millis()-timerA > 5000)
             {
-                applied = false;
-                radio.setChannel( APPLICATION_CH );
+                registered = false;
+                radio.setChannel( REGISTRATION_CH );
                 Serial.println("\nTimer has gone");
             }
         }
-        else
-        {//not applied, here's the application procces
-        //SenActs keep sending their Board packages, server can read only one at a time.
-        //When the server reads one, it sends the same package back as ack...
-        //since all boards names are different, only the one that sent it will get it back
-            radio.flush_tx();
-            //Send board package
-            if(writePackage(package, 32, radio))
-            {
-                byte testP[32];
-                //read the response back and check against board package
-                if(readPackageAck(testP, 32,package,32,radio))
-                {   
-                    radio.setChannel( DEFINITION_CH );  //change channel to definition chanel
-                    byte k = 1;
-                    if(writePackage(&k, 1,radio))       //send back 1 over def channel for ack
-                    {
-                        applied = true;
-                        Serial.println("\nApplied");
-                        timerA = millis();              //start deffinition timer
-                    }
-                    else
-                    {//failed to send ack go back to application
-                        radio.setChannel( APPLICATION_CH );
-                        Serial.println("\nError 3");
-                    }
-                }
-                else
-                {//failed the pack ack, go back to applictaio
-                    Serial.println("\nError 2");
-                }
-            }
-            else
-            {//failed to write, try again :)
-                Serial.println("\nError 1");
-            }
-        }
-    }
-}
+        */
+
+
 
 /*
 void loop()
