@@ -63,13 +63,6 @@ void loop()
     
     if((nBoards < MAX_N_BOARDS) && (nSenActs < MAX_N_SENACT))
     {
-    }
-    
-    
-}
-
-boolean addNewBoard()
-    {
         byte newBoard[32], package[32];
         radio.setChannel( APPLICATION_CH );
         
@@ -126,7 +119,11 @@ boolean addNewBoard()
         else
         {
             //Serial.println("Error 0");
-        }        
+        }
+    }
+    
+    
 }
+
 // vim:cin:ai:sts=2 sw=2 ft=cpp
 

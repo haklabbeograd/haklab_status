@@ -103,24 +103,24 @@ void packSenAct(SenAct theSenAct, byte * package)
 void unpackSenAct(SenAct* theSenAct, byte * package)
 {
     int i =0;
-    //Serial.print("Sensor/Actuator name: ");
+    Serial.print("\nSensor/Actuator name: ");
     for(i = 0; i < SIZE_OF_NAME; i++)
     {
         (*theSenAct).name[i] = (char) package[i];
-        //Serial.print((*theSenAct).name[i]);
+        Serial.print((*theSenAct).name[i]);
     }
-    //Serial.println("");
-    //Serial.print("Data_type: ");
+    Serial.println("");
+    Serial.print("Data_type: ");
     theSenAct->type = (DATATYPE) package[SIZE_OF_NAME];
-    //Serial.println(theSenAct->type,DEC);
-    //Serial.print("Number of data bytes: ");
+    Serial.println(theSenAct->type,DEC);
+    Serial.print("Number of data bytes: ");
     theSenAct->nData = (unsigned char) package[SIZE_OF_NAME + 1];
-    //Serial.println(theSenAct->nData,DEC);
-    //Serial.print("Sensor or Acuator: ");
+    Serial.println(theSenAct->nData,DEC);
+    Serial.print("Sensor or Acuator: ");
     theSenAct->sOrA = (S_OR_A) package[SIZE_OF_NAME + 2];
-    //Serial.println(theSenAct->sOrA,DEC);
-    //Serial.print("Sensor number: ");
+    Serial.println(theSenAct->sOrA,DEC);
+    Serial.print("Sensor number: ");
     theSenAct->nSA = (unsigned char) package[SIZE_OF_NAME + 3];
-    //Serial.println(theSenAct->nSA,DEC);
+    Serial.println(theSenAct->nSA,DEC);
 }
 
