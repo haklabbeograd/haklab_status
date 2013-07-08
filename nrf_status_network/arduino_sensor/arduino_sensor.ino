@@ -18,21 +18,15 @@ this skect is of a sensor board....
 // Uncomment whatever type you're using!
 #define DHTTYPE DHT11   // DHT 11 
 
-DHT dht(DHTPIN, DHTTYPE);
-
 //
 // Hardware configuration
 //
 
-// Set up nRF24L01 radio on SPI bus plus pins 9 & 10
-
+DHT dht(DHTPIN, DHTTYPE);
 RF24 radio(9,10);
 boolean connected = false;
-boolean registered = false;
-//byte packageTot[BOARD_NSENACT][32];
-//byte package[32];
-
 unsigned long timerA;
+
 // Radio pipe addresses for the 2 nodes to communicate.
 const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
 
@@ -70,9 +64,10 @@ void setup(void)
 
 
 void loop()
-{
+{    
     if(connected)
-    {//Connected respond to Server commands
+    {   //Connected: respond to Server commands
+        
         //Testing function, disconects after 5s
         if(millis()-timerA > 5000)
             {
@@ -82,75 +77,10 @@ void loop()
             }
     }
     else
-    {//if not connected senact needs to apply and define
-        if(registered)
-        {
-            if(connected = defineBoard(&registered, &TimerA, radio))
-            {
-                registered = false;
-                timerA = millis();//TEST
-            }
-            //Definition timer
-            //goes back to register mode, if not connected within 5s
-            if(millis()-timerA > 5000)
-            {
-                registered = false;
-                radio.setChannel( REGISTRATION_CH );
-                Serial.println("\nTimer has gone");
-            }
-        }
-        else
-        {
-            if(registerBoard(RF24 radioX))
-            {
-                registered = true;
-                timerA = millis();
-            }
-        }
+    {
+        connected = registerAndDefineBoard(&timerA, radio);
     }
 }
-
-/*{   //if allready registered continue with defining
-            byte k;
-            if(readPackage(&k, 1,radio))
-            {//read command from server
-                if(k == 0xff)
-                {//connected...
-                    registered = false;
-                    connected = true;
-                    Serial.println("Connected");
-                    timerA = millis(); //TEST
-                }
-                if(k == 0xf0)
-                {//new channel setup...
-                }                
-                if(k < 0xf0)
-                {   //send SenAct package #k to server
-                    if(writePackage(packageTot[k], 32, radio))
-                        Serial.println("\nSent #k SenACt");
-                    else
-                    {//failed to send #k senact package
-                        Serial.println("\nError in sending k pack");
-                    }
-                }
-            }
-            else
-            {// failed to read command
-                Serial.println("\nError in read command");
-            }
-            
-            //Definition timer
-            //goes back to apply mode, if not connected within 5s
-            if(millis()-timerA > 5000)
-            {
-                registered = false;
-                radio.setChannel( REGISTRATION_CH );
-                Serial.println("\nTimer has gone");
-            }
-        }
-        */
-
-
 
 /*
 void loop()
