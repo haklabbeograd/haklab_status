@@ -9,7 +9,8 @@ unsigned char SenActNSA[BOARD_NSENACT] = {SENSOR1_NSA,SENSOR2_NSA};
 byte packageTot[BOARD_NSENACT][32];
 byte BoardPack[32];
 boolean registered = false;
-
+unsigned char Channal;
+float value[BOARD_NSENACT];
 
 boolean readPackage(void * package,unsigned char len, RF24 radioX)
 {
@@ -157,16 +158,45 @@ boolean registerBoard(RF24 radioX)
 
 boolean defineBoard(boolean * registered, RF24 radioX)
 {   //if allready registered continue with defining
-    byte k;
+    byte k,ch;
     if(readPackage(&k, 1,radioX))
     {//read command from server
+        Serial.print("\ncommand receved:");
+        Serial.print(k,HEX);
+        Serial.println("");
         if(k == 0xff)
         {//connected...
             Serial.println("Connected");
+            radioX.stopListening();
+            radioX.setChannel(Channal);
+            radioX.startListening();
             return true;
         }
         if(k == 0xf0)
         {//new channel setup...
+            k = 1;
+            if(writePackage(&k, 1, radioX))
+            {
+                if(readPackage(&ch, 1,radioX))
+                {
+                    if(writePackage(&k, 1, radioX))
+                    {
+                        Channal = (unsigned char)ch;
+                    }
+                    else
+                    {
+                        Serial.println("\nError write ch ack");
+                    }
+                }
+                else
+                {
+                    Serial.println("\nError read ch");
+                }
+            }
+            else
+            {
+                Serial.println("\nError write ch comm ack");
+            }
         }                
         if(k < 0xf0)
         {   //send SenAct package #k to server
@@ -194,7 +224,9 @@ boolean registerAndDefineBoard(unsigned long *timerA, RF24 radioX)
         if(millis()-*timerA > 5000)
         {
             registered = false;
+            radioX.stopListening();
             radioX.setChannel( REGISTRATION_CH );
+            radioX.startListening();
             Serial.println("\nTimer has gone");
         }
         
@@ -214,4 +246,22 @@ boolean registerAndDefineBoard(unsigned long *timerA, RF24 radioX)
         }
     }
     return false;
+}
+
+boolean commandReceved(byte command, RF24 radioX)
+{
+    
+}
+boolean parseCommand(byte command, RF24 radioX)
+{
+    if(command < 0xf0)
+    {
+        writePackage(&(value[command]),SENSOR1_NDATA,radioX);
+    }
+    else if (command == 0xf0)
+    {
+    }
+    else if (command == 0xff)
+    {
+    }
 }

@@ -8,7 +8,7 @@
 typedef enum {BOOL, U_CHAR, S_CHAR, U_INT16, S_INT16, UL_INT32, SL_INT32,FLOAT, DOUBLE } DATATYPE;
 typedef enum {SENSOR, ACTUATOR} S_OR_A;
 
-extern RF24 radio;
+//extern RF24 radio;
 
 #define MAX_N_BOARDS 8
 #define MAX_N_SENACT 10
@@ -17,6 +17,7 @@ extern RF24 radio;
 #define SIZE_OF_NAME 20
 #define MAX_DATA_SIZE
 #define PAYLOAD_SIZE 32
+
 
 struct senact
 {
@@ -45,7 +46,12 @@ extern  Board Boards[MAX_N_BOARDS];
 extern  SenAct SenActs[MAX_N_SENACT];
 extern  unsigned char nBoards;
 extern  unsigned char nSenActs;
+extern  unsigned char freeCH[127];
+extern  unsigned char nFreeCH;
+extern  unsigned char nextFreeCH;
 
+void initialiseBoard();
+void mapFreeCH();
 boolean readSensorB(SenAct * theSenAct);
 boolean readAllSonBoard(Board * theBoard);
 boolean readPackage(void * package,unsigned char len);

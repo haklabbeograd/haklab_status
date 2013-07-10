@@ -4,28 +4,76 @@ byte newBoardPacked[32];
 byte package[32];
 Board Boards[MAX_N_BOARDS];
 SenAct SenActs[MAX_N_SENACT];
+byte freeCH[127];
+
+
 unsigned char nBoards = 0;
 unsigned char nSenActs = 0;
+unsigned char nFreeCH=0;
+unsigned char nextFreeCH = 0;
+
+// Set up nRF24L01 radio on SPI bus plus pins 9 & 10 
+RF24 radio(9,10);
+
+// Radio pipe addresses for the 2 nodes to communicate.
+const uint64_t pipes[2] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL};
+
+void initialiseBoard()
+{
+    Serial.begin(57600);
+    radio.begin();
+    // optionally, increase the delay between retries & # of retries
+    radio.setRetries(15,15);
+    radio.setPayloadSize(PAYLOAD_SIZE);
+    radio.openReadingPipe(1,pipes[1]);
+    radio.startListening();
+    
+}
+
+void mapFreeCH()
+{
+    radio.stopListening();
+    radio.setAutoAck(false);
+    
+    
+    for( int i = 30; i< 127; i++)
+    {
+        radio.setChannel(i);
+        radio.startListening();
+        delayMicroseconds(250);
+        radio.stopListening();
+        
+        if ( radio.testCarrier() )
+        {
+            freeCH[nFreeCH++] = i;
+        }        
+    }
+    radio.setAutoAck(true);
+    radio.startListening();
+}
 
 boolean readSensorB(SenAct * theSenAct)
 {
-  byte data[theSenAct->nData];
-  while(!radio.write( &(theSenAct->nSA), 1));
+    while(!radio.write( &(theSenAct->nSA), 1));
   
-  boolean temp = readPackage(theSenAct->lastReading, theSenAct->nData);
+    boolean temp = readPackage(theSenAct->lastReading, theSenAct->nData);
+    Serial.println("\nRead sensor");
+    Serial.print(*((float*)theSenAct->lastReading));
   
-  return temp;
+    return temp;
 }
 
 boolean readAllSonBoard(Board * theBoard)
 {
-  radio.setChannel(theBoard->channel);
-  
-  for(int i =0;i < theBoard->nSenAct; i++)
-  {
-    if( readSensorB(&((theBoard->arraySenAct)[i])) == 0 ) return 0;
-  }
-  return 1;
+    radio.stopListening();
+    radio.setChannel(theBoard->channel);
+    radio.startListening();
+    
+    for(int i =0;i < theBoard->nSenAct; i++)
+    {
+        if( readSensorB(&((theBoard->arraySenAct)[i])) == 0 ) return 0;
+    }
+    return 1;
 }
 
 boolean writePackage(void * package, unsigned char len)
@@ -209,12 +257,60 @@ boolean newBoardDefine()
         return false;
         }
     }
-    nBoards++;
-    k=0xff;
-    if(writePackage(&k, 1))return true;
+    //Send change channel command
+    k=0xf0;
+    if(writePackage(&k, 1))
+    {
+        k=1;
+        if(readPackageAck(package,1,&k,1))
+        {
+            if(writePackage(&freeCH[nFreeCH],1))
+            {
+                if(readPackageAck(package,1,&k,1))
+                {
+                    Boards[nBoards].channel = freeCH[nFreeCH];
+                    nFreeCH--;
+                    nextFreeCH++;                    
+                }
+                else
+                {
+                    nSenActs = tempNsenAct;
+                    Serial.println("\nError in read ch ACK");
+                    return false;
+                }
+            }
+            else
+            {
+                nSenActs = tempNsenAct;
+                Serial.println("\nError in write ch");
+                return false;
+            }
+        }
+        else
+        {
+            nSenActs = tempNsenAct;
+            Serial.println("\nError in read ch comm ACK");
+            return false;
+        }
+    }
     else
     {
-        nBoards-=1;
+        nSenActs = tempNsenAct;
+        Serial.println("\nError in write ch comm");
+        return false;
+    }
+    
+    
+    //Send connected command
+    k=0xff;
+    delay(10);
+    if(writePackage(&k, 1))
+    {
+        return true;
+        nBoards++;
+    }
+    else
+    {
         nSenActs = tempNsenAct;
         Serial.println("\nError in write conn");
         return false;

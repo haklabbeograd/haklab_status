@@ -8,43 +8,40 @@
  */
 
 #include <SPI.h>
-//#include "nRF24L01.h"
 #include "RF24.h"
-#include "printf.h"
 #include "Board.h"
 
 
-
-// Set up nRF24L01 radio on SPI bus plus pins 9 & 10 
-RF24 radio(9,10);
-
-// Radio pipe addresses for the 2 nodes to communicate.
-const uint64_t pipes[2] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL};
-
 void setup(void)
 {
-  Serial.begin(57600);
-  printf_begin();
-  radio.begin();
-  // optionally, increase the delay between retries & # of retries
-  radio.setRetries(15,15);
-  radio.setPayloadSize(PAYLOAD_SIZE);
-  radio.openReadingPipe(1,pipes[1]);
-  radio.startListening();
+    initialiseBoard();
+    //mapFreeCH();
+    nFreeCH = 2;
+    freeCH[0] = 70;
+    freeCH[1] = 72;
+    nextFreeCH = 0;
 }
 
 void loop()
 {    
+    //Serial.print(nFreeCH);
+    Serial.println("\npassed setup");
     byte k =1;
-    for(int i = 0; i < nBoards; i++)
-    {
-    //readAllSonBoard(&(Boards[i]));
-    //delay(2500);
+        
+    if(nBoards)
+    {    
+        Serial.println("\nentered readout");
+        for(int i = 0; i < nBoards; i++)
+        {
+        readAllSonBoard(&(Boards[i]));
+        delay(2500);
+        }
     }
     
     
-    if(unregBoardAvailable())
+    if(nFreeCH && unregBoardAvailable())
     {
+        Serial.println("entered registration");
         if(newBoardConnect())
         {
             if(newBoardDefine()) Serial.println("\nBoard added");

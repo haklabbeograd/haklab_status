@@ -67,9 +67,19 @@ void loop()
 {    
     if(connected)
     {   //Connected: respond to Server commands
+        byte command;
+        value[0]=dht.readHumidity();
+        value[1]=dht.readTemperature();
+        if(readPackage(&command, 1,radio))
+        {
+            parseCommand(command,radio);
+        }
+        else
+        {
+        }
         
         //Testing function, disconects after 5s
-        if(millis()-timerA > 5000)
+        if(millis()-timerA > 50000)
             {
                 connected = false;
                 radio.setChannel( REGISTRATION_CH );

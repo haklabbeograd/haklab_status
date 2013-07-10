@@ -25,8 +25,7 @@ typedef enum {SENSOR, ACTUATOR} S_OR_A;
 #define SENSOR2_NSA         1
 #define SENSOR2_SORA        SENSOR
 
-
-
+extern float value[BOARD_NSENACT];
 
 boolean readPackage(void * package,unsigned char len, RF24 radioX);
 boolean readPackageAck(byte * package, unsigned char len, byte * ack, unsigned char lenAck, RF24 radioX);
@@ -36,5 +35,8 @@ void packSenAct(unsigned char n);
 boolean registerBoard(RF24 radioX);
 boolean defineBoard(boolean * registered, RF24 radio);
 boolean registerAndDefineBoard(unsigned long *timerA, RF24 radioX);
+byte commandReceved(RF24 radioX);
+boolean parseCommand(byte command, RF24 radioX);
+
 
 #endif
