@@ -77,6 +77,7 @@ void loop()
         if(readPackage(&command, 1,radio))
         {
             parseCommand(command,radio);
+            timerA = millis();
         }
         else
         {
