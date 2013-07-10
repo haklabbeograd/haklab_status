@@ -4,29 +4,22 @@ uses the RF24 library so connect up the nRF24 modules as per the link above...
 this skect is of a sensor board....
 */
 
-#include <stdio.h>
 #include <SPI.h>
 #include "nRF24L01.h"
 #include "RF24.h"
-#include "printf.h"
 #include "Board.h"
-#include "DHT.h"
 
-#define DHTPIN 8     // what pin we're connected to
 #define PAYLOAD_SIZE 32
 
-// Uncomment whatever type you're using!
-#define DHTTYPE DHT11   // DHT 11 
 
 //
 // Hardware configuration
 //
 
-DHT dht(DHTPIN, DHTTYPE);
 RF24 radio(9,10);
 boolean connected = false;
 unsigned long timerA;
-
+unsigned char doorPin = 8;
 // Radio pipe addresses for the 2 nodes to communicate.
 const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
 
@@ -35,10 +28,9 @@ void setup(void)
   //
   // Setup and configure rf radio
   //
+  pinMode(doorPin, INPUT);
   Serial.begin(57600);
-  printf_begin();
   radio.begin();
-  dht.begin();
   // optionally, increase the delay between retries & # of retries
   radio.setRetries(15,15);
   radio.setChannel( REGISTRATION_CH );
@@ -69,10 +61,9 @@ void loop()
     {   //Connected: respond to Server commands
         byte command;
         
-        value[0]=dht.readHumidity();
-        value[1]=dht.readTemperature();
-        packValue(&value[0], 4, Value[0]);
-        packValue(&value[1], 4, Value[1]);
+        value[0]=digitalRead(doorPin);
+        
+        packValue(&value[0], 1, Value[0]);
 
         if(readPackage(&command, 1,radio))
         {

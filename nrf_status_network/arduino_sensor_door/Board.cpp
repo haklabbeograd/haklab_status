@@ -1,16 +1,16 @@
 #include "Board.h"
 
-char * SenActNames[BOARD_NSENACT] = {SENSOR1_NAME,SENSOR2_NAME};
-DATATYPE SenActTypes[BOARD_NSENACT] = {SENSOR1_DATATYPE,SENSOR2_DATATYPE};
-unsigned char SenActNdata[BOARD_NSENACT] = {SENSOR1_NDATA,SENSOR2_NDATA};
-S_OR_A  SenActSoRa[BOARD_NSENACT] = {SENSOR1_SORA,SENSOR2_SORA};
-unsigned char SenActNSA[BOARD_NSENACT] = {SENSOR1_NSA,SENSOR2_NSA};
+char * SenActNames[BOARD_NSENACT] = {SENSOR1_NAME};
+DATATYPE SenActTypes[BOARD_NSENACT] = {SENSOR1_DATATYPE};
+unsigned char SenActNdata[BOARD_NSENACT] = {SENSOR1_NDATA};
+S_OR_A  SenActSoRa[BOARD_NSENACT] = {SENSOR1_SORA};
+unsigned char SenActNSA[BOARD_NSENACT] = {SENSOR1_NSA};
 
 byte packageTot[BOARD_NSENACT][32];
 byte BoardPack[32];
 boolean registered = false;
 unsigned char Channal;
-float value[BOARD_NSENACT];
+bool value[BOARD_NSENACT];
 byte Value[BOARD_NSENACT][MAX_SIZE_OF_DATA];
 
 

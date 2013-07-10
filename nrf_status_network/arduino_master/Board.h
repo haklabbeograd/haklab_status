@@ -15,7 +15,7 @@ typedef enum {SENSOR, ACTUATOR} S_OR_A;
 #define APPLICATION_CH 10
 #define DEFINITION_CH  20
 #define SIZE_OF_NAME 20
-#define MAX_DATA_SIZE
+#define MAX_DATA_SIZE   4
 #define PAYLOAD_SIZE 32
 
 

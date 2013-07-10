@@ -63,25 +63,25 @@ void mapFreeCH()
 
 boolean readSensorB(SenAct * theSenAct)
 {
-    //while(!radio.write( &(theSenAct->nSA), 1));
-    Serial.println((char*)theSenAct->name);
+    Serial.print((char*)theSenAct->name);
+    Serial.print(": ");
     if(writePackage(&(theSenAct->nSA),1))
     {
         if(readPackage(theSenAct->lastReading, theSenAct->nData))
         {
-            Serial.println("\nRead sensor");
-            Serial.print(*((float*)theSenAct->lastReading));
+            if(theSenAct->type == FLOAT)Serial.println(*((float*)theSenAct->lastReading));
+            else if (theSenAct->type == BOOL)Serial.println(*((boolean*)theSenAct->lastReading));
             return true;
         }
         else
         {
-            Serial.println("Fail write read sensor");
+            Serial.println("Fail read sensor");
             return false;
         }
     }
     else
     {
-        Serial.println("Fail write read sensor");
+        Serial.println("Fail write to read sensor");
         return false;
     }
 }
@@ -91,13 +91,13 @@ boolean readAllSonBoard(Board * theBoard)
     radio.stopListening();
     
     radio.setChannel(theBoard->channel);
-    Serial.println((char*)theBoard->name); 
-    Serial.println(theBoard->channel);
+    Serial.println((char*)theBoard->name);
+    Serial.println(theBoard->channel); 
     radio.startListening();
     
     for(int i =0;i < theBoard->nSenAct; i++)
     {
-        if( readSensorB(&((theBoard->arraySenAct)[i])) == 0 ) return 0;
+        if( readSensorB(theBoard->arraySenAct+i) == 0 ) return 0;
     }
     return 1;
 }
@@ -223,7 +223,7 @@ boolean unregBoardAvailable()
         }
         else
         {
-            Serial.println("\nError: reading newBoard pack");
+            //Serial.println("\nError: no New Board");
             return false;
         }       
     }
@@ -267,7 +267,8 @@ boolean newBoardDefine()
             if(readPackage(package,32))
             {
                 unpackSenAct( &SenActs[nSenActs],package);
-                nSenActs=nSenActs++;
+                Serial.println((char*)SenActs[nSenActs].name);
+                nSenActs++;
             }
             else
             {
@@ -295,11 +296,11 @@ boolean newBoardDefine()
                 if(readPackageAck(package,1,&k,1))
                 {
                     Boards[nBoards].channel = freeCH[nextFreeCH];
-                    Serial.println("\nfree Chanell: ");
-                    Serial.print(freeCH[nextFreeCH],HEX);
+                    //Serial.println("\nfree Chanell: ");
+                    //Serial.print(freeCH[nextFreeCH],DEC);
                     
-                    nFreeCH--;
-                    nextFreeCH++;                    
+                    nFreeCH=nFreeCH-4;
+                    nextFreeCH=nextFreeCH+4;                    
                 }
                 else
                 {

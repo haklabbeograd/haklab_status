@@ -19,18 +19,18 @@ void setup(void)
 
 void loop()
 {    
-    //Serial.print(nFreeCH);
-    Serial.println("\npassed setup");
     byte k =1;
-        
+    Serial.print("\nNumber of Boards connected: ");
+    Serial.println(nBoards);    
     if(nBoards)
     {    
         Serial.println("\nentered readout");
         for(int i = 0; i < nBoards; i++)
         {
         readAllSonBoard(&(Boards[i]));
-        delay(2500);
+        delay(250);
         }
+        delay(2500);
     }
     
     
@@ -39,7 +39,10 @@ void loop()
         Serial.println("entered registration");
         if(newBoardConnect())
         {
-            if(newBoardDefine()) Serial.println("\nBoard added");
+            if(newBoardDefine()) 
+            {
+                Serial.println("\nBoard added: ");
+            }
             else;
         }
         else;

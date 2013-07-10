@@ -11,22 +11,16 @@ typedef enum {SENSOR, ACTUATOR} S_OR_A;
 #define SIZE_OF_NAME    20
 #define MAX_SIZE_OF_DATA 8
 
-#define BOARD_NAME          "DHT11"
-#define BOARD_NSENACT       2
+#define BOARD_NAME          "Door Lock"
+#define BOARD_NSENACT       1
 
-#define SENSOR1_NAME        "Humidity"
-#define SENSOR1_DATATYPE    FLOAT
-#define SENSOR1_NDATA       4
+#define SENSOR1_NAME        "Lock"
+#define SENSOR1_DATATYPE    BOOL
+#define SENSOR1_NDATA       1
 #define SENSOR1_NSA         0
 #define SENSOR1_SORA        SENSOR
 
-#define SENSOR2_NAME        "Temperature"
-#define SENSOR2_DATATYPE    FLOAT
-#define SENSOR2_NDATA       4
-#define SENSOR2_NSA         1
-#define SENSOR2_SORA        SENSOR
-
-extern float value[BOARD_NSENACT];
+extern bool value[BOARD_NSENACT];
 extern byte Value[BOARD_NSENACT][MAX_SIZE_OF_DATA];
 
 boolean readPackage(void * package,unsigned char len, RF24 radioX);
