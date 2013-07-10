@@ -1,3 +1,9 @@
+/*
+*   This program is free software; you can redistribute it and/or
+*   modify it under the terms of the GNU General Public License
+*   version 2 as published by the Free Software Foundation.  
+*/
+
 #include "Board.h"
 
 byte newBoardPacked[32];
@@ -18,6 +24,8 @@ RF24 radio(9,10);
 // Radio pipe addresses for the 2 nodes to communicate.
 const uint64_t pipes[2] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL};
 
+/****************************************************************************/
+
 void initialiseBoard()
 {
     Serial.begin(57600);
@@ -30,6 +38,8 @@ void initialiseBoard()
     radio.startListening();
     
 }
+
+/****************************************************************************/
 
 void mapFreeCH()
 {
@@ -61,6 +71,8 @@ void mapFreeCH()
     Serial.println("");
 }
 
+/****************************************************************************/
+
 boolean readSensorB(SenAct * theSenAct)
 {
     Serial.print((char*)theSenAct->name);
@@ -86,6 +98,8 @@ boolean readSensorB(SenAct * theSenAct)
     }
 }
 
+/****************************************************************************/
+
 boolean readAllSonBoard(Board * theBoard)
 {
     radio.stopListening();
@@ -102,6 +116,8 @@ boolean readAllSonBoard(Board * theBoard)
     return 1;
 }
 
+/****************************************************************************/
+
 boolean writePackage(void * package, unsigned char len)
 {
     radio.stopListening();
@@ -109,6 +125,8 @@ boolean writePackage(void * package, unsigned char len)
     radio.startListening();
     return temp;
 }
+
+/****************************************************************************/
 
 boolean readPackage(void * package,unsigned char len)
 {
@@ -126,6 +144,8 @@ boolean readPackage(void * package,unsigned char len)
     return !timeout;
            
 } 
+
+/****************************************************************************/
 
 boolean readPackageAck(byte * package, unsigned char len, byte * ack, unsigned char lenAck)
 {
@@ -146,7 +166,7 @@ boolean readPackageAck(byte * package, unsigned char len, byte * ack, unsigned c
     return false;
 }
 
-
+/****************************************************************************/
 
 void packBoard(Board theBoard, byte * package)
 {
@@ -155,6 +175,9 @@ void packBoard(Board theBoard, byte * package)
   for(i = 0; i < SIZE_OF_NAME; i++)package[i] = (byte) theBoard.name[i];
   package[i]=(byte)theBoard.nSenAct;
 }
+
+/****************************************************************************/
+
 void unpackBoard(Board* theBoard, byte * package)
 {
     int i =0;
@@ -170,6 +193,9 @@ void unpackBoard(Board* theBoard, byte * package)
     Serial.print("Number of Sensors/Actuators: ");
     Serial.print(theBoard->nSenAct);
 }
+
+/****************************************************************************/
+
 void packSenAct(SenAct theSenAct, byte * package)
 {
     int i =0;
@@ -180,6 +206,9 @@ void packSenAct(SenAct theSenAct, byte * package)
     package[i++]=(byte)theSenAct.sOrA;
     package[i]=(byte)theSenAct.nSA;
 }
+
+/****************************************************************************/
+
 void unpackSenAct(SenAct* theSenAct, byte * package)
 {
     int i =0;
@@ -204,7 +233,9 @@ void unpackSenAct(SenAct* theSenAct, byte * package)
     Serial.println(theSenAct->nSA,DEC);
 }
 
-boolean unregBoardAvailable()
+/****************************************************************************/
+
+boolean newBoardAvailable()
 {
     if((nBoards < MAX_N_BOARDS) && (nSenActs < MAX_N_SENACT)&&nFreeCH)
     {
@@ -234,6 +265,8 @@ boolean unregBoardAvailable()
     }
 }
 
+/****************************************************************************/
+
 boolean newBoardConnect()
 {
     byte k =1;
@@ -253,6 +286,8 @@ boolean newBoardConnect()
         return false;
     }
 }
+
+/****************************************************************************/
 
 boolean newBoardDefine()
 {
@@ -352,6 +387,8 @@ boolean newBoardDefine()
     }
 }
 
+/****************************************************************************/
+
 boolean alreadyRegistared(Board *theBoard, int *index)
 {
     boolean found = true;
@@ -367,6 +404,8 @@ boolean alreadyRegistared(Board *theBoard, int *index)
     }
     return false;
 }
+
+/****************************************************************************/
 
 boolean returnBoardToNetwork(Board *theBoard, int index)
 {
