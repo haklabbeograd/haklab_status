@@ -64,6 +64,7 @@ void unpackSenAct(SenAct* theSenAct, byte * package);
 boolean unregBoardAvailable();
 boolean newBoardConnect();
 boolean newBoardDefine();
-
+boolean alreadyRegistared(Board *theBoard,int *index);
+boolean returnBoardToNetwork(Board *theBoard, int index);
 
 #endif

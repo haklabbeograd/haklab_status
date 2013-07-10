@@ -257,7 +257,12 @@ boolean newBoardConnect()
 boolean newBoardDefine()
 {
     byte k;
+    int index;
+    if(alreadyRegistared(&Boards[nBoards],&index))
+        return returnBoardToNetwork(&Boards[nBoards],index);
+        
     unsigned char tempNsenAct = nSenActs;
+        
     for(int i =0; i< Boards[nBoards].nSenAct; i++)
     {    
         k=i;
@@ -344,5 +349,58 @@ boolean newBoardDefine()
         nSenActs = tempNsenAct;
         Serial.println("\nError in write conn");
         return false;
+    }
+}
+
+boolean alreadyRegistared(Board *theBoard, int *index)
+{
+    boolean found = true;
+    for(int i = 0; i < nBoards; i++)
+    {
+        found = true;
+        *index = i;
+        for(int j = 0; j < SIZE_OF_NAME;j++)
+        {
+            if(theBoard->name[j]!=Boards[i].name[j])found = false;
+        }
+        if(found) return true;        
+    }
+    return false;
+}
+
+boolean returnBoardToNetwork(Board *theBoard, int index)
+{
+    byte k=0xf0;
+    if(writePackage(&k, 1))
+    {
+        k=1;
+        if(readPackageAck(package,1,&k,1))
+        {
+            if(writePackage(&(Boards[index].channel),1))
+            {
+                if(readPackageAck(package,1,&k,1))
+                {
+                    //Send connected command
+                    k=0xff;
+                    delay(10);
+                    if(writePackage(&k, 1)) 
+                    {
+                        Serial.println("Board reconnected!");
+                        return true;
+                    }
+                    else   return false;
+                }
+                else return false;
+            }
+            else
+            {return false;
+            }
+        }
+        else
+        {return false;
+        }
+    }
+    else
+    {return false;
     }
 }
