@@ -87,10 +87,12 @@ void packSenAct(unsigned char n)
     package[i++]=(byte)SenActSoRa[n];
     package[i]=(byte)SenActNSA[n];
     */
+    Serial.println("\nPacking Sensor");
     while(SenActNames[n][i]&&((SIZE_OF_NAME-i)>0))
     {
         
       packageTot[n][i] = (byte) SenActNames[n][i];
+      Serial.print((char)packageTot[n][i]);
       i++;
     }
     while((SIZE_OF_NAME - i)>0)
@@ -99,7 +101,7 @@ void packSenAct(unsigned char n)
     }
   
     packageTot[n][SIZE_OF_NAME]=(byte)SenActTypes[n];
-    //Serial.print(package[SIZE_OF_NAME]);
+    Serial.print(packageTot[n][SIZE_OF_NAME]);
     packageTot[n][SIZE_OF_NAME + 1]=(byte)SenActNdata[n];
     //Serial.print(package[SIZE_OF_NAME + 1]);
     packageTot[n][SIZE_OF_NAME + 2]=(byte)SenActSoRa[n];
@@ -158,21 +160,22 @@ boolean registerBoard(RF24 radioX)
 
 boolean defineBoard(boolean * registered, RF24 radioX)
 {   //if allready registered continue with defining
-    byte k,ch;
-    if(readPackage(&k, 1,radioX))
+    byte c,k,ch;
+    if(readPackage(&c, 1,radioX))
     {//read command from server
         Serial.print("\ncommand receved:");
-        Serial.print(k,HEX);
+        Serial.print(c,HEX);
         Serial.println("");
-        if(k == 0xff)
+        if(c == 0xff)
         {//connected...
             Serial.println("Connected");
             radioX.stopListening();
             radioX.setChannel(Channal);
             radioX.startListening();
+            Serial.println(Channal);
             return true;
         }
-        if(k == 0xf0)
+        if(c == 0xf0)
         {//new channel setup...
             k = 1;
             if(writePackage(&k, 1, radioX))
@@ -182,6 +185,7 @@ boolean defineBoard(boolean * registered, RF24 radioX)
                     if(writePackage(&k, 1, radioX))
                     {
                         Channal = (unsigned char)ch;
+                        Serial.println(Channal);
                     }
                     else
                     {
@@ -198,10 +202,13 @@ boolean defineBoard(boolean * registered, RF24 radioX)
                 Serial.println("\nError write ch comm ack");
             }
         }                
-        if(k < 0xf0)
+        if(c < 0xf0)
         {   //send SenAct package #k to server
-            if(writePackage(packageTot[k], 32, radioX))
+            if(writePackage(packageTot[c], 32, radioX))
+            {
                 Serial.println("\nSent #k SenACt");
+                Serial.println( (char*)packageTot[c]);
+            }
             else
             {//failed to send #k senact package
                 Serial.println("\nError in sending k pack");
@@ -254,6 +261,7 @@ boolean commandReceved(byte command, RF24 radioX)
 }
 boolean parseCommand(byte command, RF24 radioX)
 {
+    Serial.print(command,HEX);
     if(command < 0xf0)
     {
         writePackage(&(value[command]),SENSOR1_NDATA,radioX);

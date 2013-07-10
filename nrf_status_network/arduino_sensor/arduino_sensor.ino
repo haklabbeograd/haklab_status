@@ -76,6 +76,7 @@ void loop()
         }
         else
         {
+            Serial.println("no command receved");
         }
         
         //Testing function, disconects after 5s
