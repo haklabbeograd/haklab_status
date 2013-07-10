@@ -15,11 +15,6 @@
 void setup(void)
 {
     initialiseBoard();
-    //mapFreeCH();
-    nFreeCH = 2;
-    freeCH[0] = 70;
-    freeCH[1] = 72;
-    nextFreeCH = 0;
 }
 
 void loop()
@@ -39,7 +34,7 @@ void loop()
     }
     
     
-    if(nFreeCH && unregBoardAvailable())
+    if(unregBoardAvailable())
     {
         Serial.println("entered registration");
         if(newBoardConnect())

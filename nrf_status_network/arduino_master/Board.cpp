@@ -22,6 +22,7 @@ void initialiseBoard()
 {
     Serial.begin(57600);
     radio.begin();
+    mapFreeCH();
     // optionally, increase the delay between retries & # of retries
     radio.setRetries(15,15);
     radio.setPayloadSize(PAYLOAD_SIZE);
@@ -32,41 +33,66 @@ void initialiseBoard()
 
 void mapFreeCH()
 {
-    radio.stopListening();
     radio.setAutoAck(false);
-    
+    radio.startListening();
+    radio.stopListening();
     
     for( int i = 30; i< 127; i++)
     {
         radio.setChannel(i);
         radio.startListening();
-        delayMicroseconds(250);
+        delay(25);
         radio.stopListening();
         
-        if ( radio.testCarrier() )
+        if ( !radio.testCarrier() )
         {
             freeCH[nFreeCH++] = i;
         }        
     }
     radio.setAutoAck(true);
     radio.startListening();
+    //test printing
+    for (int i =0; i<nFreeCH;i++)
+    {
+        Serial.println(freeCH[i]);
+    }
+    Serial.println("");
+    Serial.print(freeCH[nextFreeCH]);
+    Serial.println("");
 }
 
 boolean readSensorB(SenAct * theSenAct)
 {
-    while(!radio.write( &(theSenAct->nSA), 1));
-  
-    boolean temp = readPackage(theSenAct->lastReading, theSenAct->nData);
-    Serial.println("\nRead sensor");
-    Serial.print(*((float*)theSenAct->lastReading));
-  
-    return temp;
+    //while(!radio.write( &(theSenAct->nSA), 1));
+    Serial.println((char*)theSenAct->name);
+    if(writePackage(&(theSenAct->nSA),1))
+    {
+        if(readPackage(theSenAct->lastReading, theSenAct->nData))
+        {
+            Serial.println("\nRead sensor");
+            Serial.print(*((float*)theSenAct->lastReading));
+            return true;
+        }
+        else
+        {
+            Serial.println("Fail write read sensor");
+            return false;
+        }
+    }
+    else
+    {
+        Serial.println("Fail write read sensor");
+        return false;
+    }
 }
 
 boolean readAllSonBoard(Board * theBoard)
 {
     radio.stopListening();
+    
     radio.setChannel(theBoard->channel);
+    Serial.println((char*)theBoard->name); 
+    Serial.println(theBoard->channel);
     radio.startListening();
     
     for(int i =0;i < theBoard->nSenAct; i++)
@@ -180,7 +206,7 @@ void unpackSenAct(SenAct* theSenAct, byte * package)
 
 boolean unregBoardAvailable()
 {
-    if((nBoards < MAX_N_BOARDS) && (nSenActs < MAX_N_SENACT))
+    if((nBoards < MAX_N_BOARDS) && (nSenActs < MAX_N_SENACT)&&nFreeCH)
     {
         radio.stopListening();
         radio.setChannel( APPLICATION_CH );
@@ -203,7 +229,7 @@ boolean unregBoardAvailable()
     }
     else
     {
-        Serial.println("Error: no more buffer space");
+        Serial.println("Error: no more buffer/channel space");
         return false;
     }
 }
@@ -264,11 +290,14 @@ boolean newBoardDefine()
         k=1;
         if(readPackageAck(package,1,&k,1))
         {
-            if(writePackage(&freeCH[nFreeCH],1))
+            if(writePackage(&freeCH[nextFreeCH],1))
             {
                 if(readPackageAck(package,1,&k,1))
                 {
-                    Boards[nBoards].channel = freeCH[nFreeCH];
+                    Boards[nBoards].channel = freeCH[nextFreeCH];
+                    Serial.println("\nfree Chanell: ");
+                    Serial.print(freeCH[nextFreeCH],HEX);
+                    
                     nFreeCH--;
                     nextFreeCH++;                    
                 }
@@ -306,8 +335,8 @@ boolean newBoardDefine()
     delay(10);
     if(writePackage(&k, 1))
     {
-        return true;
         nBoards++;
+        return true;
     }
     else
     {
