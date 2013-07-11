@@ -6,32 +6,52 @@ unsigned char SenActNdata[BOARD_NSENACT] = {SENSOR1_NDATA};
 S_OR_A  SenActSoRa[BOARD_NSENACT] = {SENSOR1_SORA};
 unsigned char SenActNSA[BOARD_NSENACT] = {SENSOR1_NSA};
 
+RF24 radio(9,10);
 byte packageTot[BOARD_NSENACT][32];
 byte BoardPack[32];
 boolean registered = false;
 unsigned char Channal;
-bool value[BOARD_NSENACT];
 byte Value[BOARD_NSENACT][MAX_SIZE_OF_DATA];
+// Radio pipe addresses for the 2 nodes to communicate.
+const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
 
+/****************************************************************************/
 
-boolean readPackage(void * package,unsigned char len, RF24 radioX)
+void initialiseBoard()
+{
+    Serial.begin(57600);        //Starts serial for debug
+    radio.begin();              //starts nRF24
+    // optionally, increase the delay between retries & # of retries
+    radio.setRetries(15,15);
+    radio.setChannel( REGISTRATION_CH );
+
+    // optionally, reduce the payload size.  seems to
+    // improve reliability
+    radio.setPayloadSize(PAYLOAD_SIZE);
+    radio.openWritingPipe(pipes[1]);
+    radio.openReadingPipe(1,pipes[0]);
+    radio.startListening();
+    radio.printDetails();   //prints out all the nRF registars for debuging
+}
+
+boolean readPackage(void * package,unsigned char len)
 {
     unsigned long started_waiting_at = millis();
     bool timeout = false;
-    while ( ! radioX.available() && ! timeout )
+    while ( ! radio.available() && ! timeout )
       if (millis() - started_waiting_at > 1000 )
         timeout = true;
         
     if(!timeout)
     {
-        timeout = !radioX.read(package, len);
+        timeout = !radio.read(package, len);
     }
     else Serial.println("\nTimeout fail");
     return !timeout;
 }
-boolean readPackageAck(byte * package, unsigned char len, byte * ack, unsigned char lenAck, RF24 radioX)
+boolean readPackageAck(byte * package, unsigned char len, byte * ack, unsigned char lenAck)
 {
-    if(readPackage(package,len,radioX))
+    if(readPackage(package,len))
     {
         for(int i = 0; i < lenAck; i++)
         {
@@ -47,11 +67,11 @@ boolean readPackageAck(byte * package, unsigned char len, byte * ack, unsigned c
     return false;
 }
 
-boolean writePackage(void * package, unsigned char len, RF24 radioX)
+boolean writePackage(void * package, unsigned char len)
 {
-    radioX.stopListening();
-    boolean temp = radioX.write(package,32);
-    radioX.startListening();
+    radio.stopListening();
+    boolean temp = radio.write(package,32);
+    radio.startListening();
     return temp;    
 }
 
@@ -123,26 +143,30 @@ void packSenAct(unsigned char n)
 //SenActs keep sending their Board packages, server can read only one at a time.
 //When the server reads one, it sends the same package back as ack...
 //since all boards names are different, only the one that sent it will get it back
-boolean registerBoard(RF24 radioX)
+boolean registerBoard(void)
 {
     //radioX.flush_tx();
     //Send board package
-    if(writePackage(BoardPack, 32, radioX))
+    if(writePackage(BoardPack, 32))
     {
         byte testP[32];
         //read the response back and check against board package
-        if(readPackageAck(testP, 32,BoardPack,32,radioX))
+        if(readPackageAck(testP, 32,BoardPack,32))
         {   
-            radioX.setChannel( DEFINITION_CH );  //change channel to definition chanel
+            radio.stopListening();
+            radio.setChannel( DEFINITION_CH );  //change channel to definition chanel
+            radio.startListening();
             byte k = 1;
-            if(writePackage(&k, 1,radioX))       //send back 1 over def channel for ack
+            if(writePackage(&k, 1))       //send back 1 over def channel for ack
             {
                 Serial.println("\nApplied");
                 return true;
             }
             else
             {//failed to send ack go back to application
-                radioX.setChannel( REGISTRATION_CH );
+                radio.stopListening();
+                radio.setChannel( REGISTRATION_CH );
+                radio.startListening();
                 Serial.println("\nError 3");
                 return false;
             }
@@ -160,10 +184,10 @@ boolean registerBoard(RF24 radioX)
     }
 }
 
-boolean defineBoard(boolean * registered, RF24 radioX)
+boolean defineBoard(void)
 {   //if allready registered continue with defining
     byte c,k,ch;
-    if(readPackage(&c, 1,radioX))
+    if(readPackage(&c, 1))
     {//read command from server
         Serial.print("\ncommand receved:");
         Serial.print(c,HEX);
@@ -171,20 +195,20 @@ boolean defineBoard(boolean * registered, RF24 radioX)
         if(c == 0xff)
         {//connected...
             Serial.println("Connected");
-            radioX.stopListening();
-            radioX.setChannel(Channal);
-            radioX.startListening();
+            radio.stopListening();
+            radio.setChannel(Channal);
+            radio.startListening();
             Serial.println(Channal);
             return true;
         }
         if(c == 0xf0)
         {//new channel setup...
             k = 1;
-            if(writePackage(&k, 1, radioX))
+            if(writePackage(&k, 1))
             {
-                if(readPackage(&ch, 1,radioX))
+                if(readPackage(&ch, 1))
                 {
-                    if(writePackage(&k, 1, radioX))
+                    if(writePackage(&k, 1))
                     {
                         Channal = (unsigned char)ch;
                         Serial.println(Channal);
@@ -206,7 +230,7 @@ boolean defineBoard(boolean * registered, RF24 radioX)
         }                
         if(c < 0xf0)
         {   //send SenAct package #k to server
-            if(writePackage(packageTot[c], 32, radioX))
+            if(writePackage(packageTot[c], 32))
             {
                 Serial.println("\nSent #k SenACt");
                 Serial.println( (char*)packageTot[c]);
@@ -224,7 +248,7 @@ boolean defineBoard(boolean * registered, RF24 radioX)
     return false;
 }
 
-boolean registerAndDefineBoard(unsigned long *timerA, RF24 radioX)
+boolean registerAndDefineBoard(unsigned long *timerA)
 {   //if not connected senact needs to apply and define
     if(registered)
     {
@@ -233,13 +257,10 @@ boolean registerAndDefineBoard(unsigned long *timerA, RF24 radioX)
         if(millis()-*timerA > 5000)
         {
             registered = false;
-            radioX.stopListening();
-            radioX.setChannel( REGISTRATION_CH );
-            radioX.startListening();
             Serial.println("\nTimer has gone");
         }
         
-        if(defineBoard(&registered, radioX))
+        if(defineBoard())
         {
             registered = false;
             *timerA = millis();//TEST
@@ -248,7 +269,11 @@ boolean registerAndDefineBoard(unsigned long *timerA, RF24 radioX)
     }
     else
     {
-        if(registerBoard(radioX))
+        radio.stopListening();
+        radio.setChannel( REGISTRATION_CH );
+        radio.startListening();
+        
+        if(registerBoard())
         {
             registered = true;
             *timerA = millis();
@@ -257,16 +282,17 @@ boolean registerAndDefineBoard(unsigned long *timerA, RF24 radioX)
     return false;
 }
 
-boolean commandReceved(byte command, RF24 radioX)
+boolean commandReceved(byte * command)
 {
-    
+    return readPackage(command, 1);
 }
-boolean parseCommand(byte command, RF24 radioX)
-{
+            
+boolean parseCommand(byte command)
+{    
     Serial.print(command,HEX);
     if(command < 0xf0)
     {
-        writePackage(&(Value[command]),SENSOR1_NDATA,radioX);
+        writePackage(&(Value[command]),SENSOR1_NDATA);
     }
     else if (command == 0xf0)
     {
@@ -276,10 +302,10 @@ boolean parseCommand(byte command, RF24 radioX)
     }
 }
 
-boolean packValue(void * boardValue, unsigned char nBytes, byte * sendValue)
+boolean packValue(void * boardValue, unsigned char nBytes, unsigned char index)
 {
     for (byte i = 0; i < nBytes; i++)
     {
-        *(sendValue+i)= *((byte*)boardValue + i);
+        Value[index][i]= *((byte*)boardValue + i);
     }
 }

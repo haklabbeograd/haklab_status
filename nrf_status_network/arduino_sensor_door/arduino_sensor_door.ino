@@ -1,59 +1,48 @@
 /*
-http://maniacbug.github.io/RF24/
-uses the RF24 library so connect up the nRF24 modules as per the link above...
-this skect is of a sensor board....
+*   This program is free software; you can redistribute it and/or
+*   modify it under the terms of the GNU General Public License
+*   version 2 as published by the Free Software Foundation.  
 */
-
+/**
+ * NRF24L01+ Sensor/Actuator Network basic slave board
+ *  
+ * This board is designed to serve as a basic slave in a Senso/Actuator Network
+ * based on the NRF24L01+ modules. It reads the status of a single pin, 
+ * and forwads this status when the Master asks for it
+ *  
+ * The library used in this project for the NRF modules is RF24 
+ * http://maniacbug.github.io/RF24/ you can also find instructions on how
+ * connect the board there.
+ */
+ 
 #include <SPI.h>
-#include "nRF24L01.h"
 #include "RF24.h"
 #include "Board.h"
-
-#define PAYLOAD_SIZE 32
-
 
 //
 // Hardware configuration
 //
-
-RF24 radio(9,10);
-boolean connected = false;
-unsigned long timerA;
-unsigned char doorPin = 8;
-// Radio pipe addresses for the 2 nodes to communicate.
-const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
+bool value[BOARD_NSENACT];
+boolean connected = false;  
+unsigned long timerA;       //Timeout Timer
+unsigned char doorPin = 8;  //Pin to read
 
 void setup(void)
 {
-  //
-  // Setup and configure rf radio
-  //
-  pinMode(doorPin, INPUT);
-  Serial.begin(57600);
-  radio.begin();
-  // optionally, increase the delay between retries & # of retries
-  radio.setRetries(15,15);
-  radio.setChannel( REGISTRATION_CH );
-
-  // optionally, reduce the payload size.  seems to
-  // improve reliability
-  radio.setPayloadSize(PAYLOAD_SIZE);
-  radio.openWritingPipe(pipes[1]);
-  radio.openReadingPipe(1,pipes[0]);
+    //
+    // Setup and configure the board
+    //
+    pinMode(doorPin, INPUT);    //pin that will be read
+    initialiseBoard();
     
-
-  //
-  // Start listening
-  //
+    //packet perp, for definition on network
     packBoard();
     for(int i = 0; i < BOARD_NSENACT; i++)
     {
         packSenAct(i);
     }
-    radio.startListening();
-    radio.printDetails();
+    
 }
-
 
 void loop()
 {    
@@ -61,80 +50,32 @@ void loop()
     {   //Connected: respond to Server commands
         byte command;
         
-        value[0]=digitalRead(doorPin);
-        
-        packValue(&value[0], 1, Value[0]);
+        value[0]=digitalRead(doorPin);      //read the pin
+        packValue(&value[0], 1, 0);  //pack the value from the original type to byte array
 
-        if(readPackage(&command, 1,radio))
+        
+        if(commandReceved(&command))//read and parse master command
         {
-            parseCommand(command,radio);
-            timerA = millis();
+            parseCommand(command);
+            timerA = millis();              //resets timer
         }
         else
         {
             Serial.println("no command receved");
         }
         
-        //Testing function, disconects after 5s
+        //Timer function disconects after 50s if no command is receved
         if(millis()-timerA > 50000)
             {
                 connected = false;
-                radio.setChannel( REGISTRATION_CH );
                 Serial.println("\nTimer Conn has gone");
             }
     }
+    //Not connected: Register, Define, and Connect
     else
     {
-        connected = registerAndDefineBoard(&timerA, radio);
+        connected = registerAndDefineBoard(&timerA);
     }
 }
 
-/*
-void loop()
-{
-    if(connected)
-    {
-    }
-    else
-    {
-        if(applyBoard(radio))connected = 1;
-    }
-}
-*/
-
-/*
-void loop(void)
-{
-  
-  // if there is data ready
-  while(!radio.available() );
-    
-  float value;
-  printf("usao");
-  // Dump the payloads until we've gotten everything
-  unsigned char nOfSensor;
-  radio.read( &nOfSensor, 1);
-  printf("Got payload %d...",nOfSensor);
-    
-  // First, stop listening so we can talk
-  radio.stopListening();
-  if(nOfSensor == 0)
-  {
-    value = dht.readHumidity();
-    Serial.print("Hum:");
-    Serial.println(value);
-  }
-  else if (nOfSensor == 1)
-  {
-    value = dht.readTemperature();
-    Serial.print("Temp:");
-    Serial.println(value);
-  }
-  else value = 0;
-    
-  while(!radio.write( &value, 4));
-    // Now, resume listening so we catch the next packets.
-  radio.startListening();
-}
-*/
 // vim:cin:ai:sts=2 sw=2 ft=cpp
