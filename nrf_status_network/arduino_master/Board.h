@@ -40,14 +40,7 @@ typedef enum {SENSOR, ACTUATOR} S_OR_A;
 #define MAX_DATA_SIZE   4
 #define PAYLOAD_SIZE 32
 
-//Board specific globals ***will be converted to board.cpp globals only
-extern  Board Boards[MAX_N_BOARDS];     /**< Array/Buffer of all connected boards to the Network */
-extern  SenAct SenActs[MAX_N_SENACT];   /**< Array/Buffer of all connected Sensor/Actuators to the Network */
-extern  unsigned char nBoards;          /**< Number of boards currently connected to the Network */
-extern  unsigned char nSenActs;         /**< Number of Sensor/Actuators currently connected to the Network */
-extern  unsigned char freeCH[127];      /**< Array of free RF channels */
-extern  unsigned char nFreeCH;          /**< number of free RF channels */
-extern  unsigned char nextFreeCH;       /**< next free RF channel, index for freeCH[] */
+
 
 /**
  * Sensor/Actuator stucture
@@ -77,6 +70,14 @@ struct board
 };
 
 typedef struct board Board;
+//Board specific globals ***will be converted to board.cpp globals only
+extern  Board Boards[MAX_N_BOARDS];     /**< Array/Buffer of all connected boards to the Network */
+extern  SenAct SenActs[MAX_N_SENACT];   /**< Array/Buffer of all connected Sensor/Actuators to the Network */
+extern  unsigned char nBoards;          /**< Number of boards currently connected to the Network */
+extern  unsigned char nSenActs;         /**< Number of Sensor/Actuators currently connected to the Network */
+extern  unsigned char freeCH[127];      /**< Array of free RF channels */
+extern  unsigned char nFreeCH;          /**< number of free RF channels */
+extern  unsigned char nextFreeCH;       /**< next free RF channel, index for freeCH[] */
 
   /**
    * Initialises the Board and all it's library components.

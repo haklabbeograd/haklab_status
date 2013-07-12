@@ -21,20 +21,22 @@
 //libraries used
 #include <SPI.h>    //SPI
 #include "RF24.h"   //RF24
-
+#include "printf.h"
 //header with network functions
 #include "Board.h"
 
 
 void setup(void)
 {
+
     initialiseBoard();
+    Serial.println("\nFinished init");
 }
 
 void loop()
 {    
     byte k =1;
-    Serial.print("\nNumber of Boards connected: ");
+    Serial.println("\nNumber of Boards connected: ");
     Serial.println(nBoards);
     
     //Reads through all the boards and their sensors    
