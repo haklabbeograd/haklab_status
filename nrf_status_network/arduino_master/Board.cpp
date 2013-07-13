@@ -33,7 +33,8 @@ void initialiseBoard()
     mapFreeCH();
     // optionally, increase the delay between retries & # of retries
     radio.setRetries(15,15);
-    radio.setPayloadSize(PAYLOAD_SIZE);
+    radio.setPayloadSize(PAYLOAD_SIZE);\
+    radio.openWritingPipe(pipes[0]);
     radio.openReadingPipe(1,pipes[1]);
     radio.startListening();
     
@@ -81,8 +82,36 @@ boolean readSensorB(SenAct * theSenAct)
     {
         if(readPackage(theSenAct->lastReading, theSenAct->nData))
         {
-            if(theSenAct->type == FLOAT)Serial.println(*((float*)theSenAct->lastReading));
-            else if (theSenAct->type == BOOL)Serial.println(*((boolean*)theSenAct->lastReading));
+            switch(theSenAct->type)
+            {
+                case BOOL:
+                    Serial.println(*((boolean*)theSenAct->lastReading));
+                    break;
+                case U_CHAR:
+                    Serial.println(*((unsigned char*)theSenAct->lastReading));
+                    break;
+                case S_CHAR:
+                    Serial.println(*((signed char*)theSenAct->lastReading));
+                    break;
+                case U_INT16:
+                    Serial.println(*((unsigned int*)theSenAct->lastReading));
+                    break;
+                case S_INT16:
+                    Serial.println(*((signed int*)theSenAct->lastReading));
+                    break;
+                case UL_INT32:
+                    Serial.println(*((unsigned long int*)theSenAct->lastReading));
+                    break;
+                case SL_INT32:
+                    Serial.println(*((signed long int*)theSenAct->lastReading));
+                    break;
+                case FLOAT:
+                    Serial.println(*((float*)theSenAct->lastReading));
+                    break;
+                case DOUBLE:
+                    Serial.println(*((double*)theSenAct->lastReading));
+                    break;
+            }
             return true;
         }
         else

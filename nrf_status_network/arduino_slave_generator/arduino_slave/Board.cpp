@@ -1,9 +1,16 @@
+/*
+*   This program is free software; you can redistribute it and/or
+*   modify it under the terms of the GNU General Public License
+*   version 2 as published by the Free Software Foundation.  
+*/
+
 #include "Board.h"
 #include "helpers.h"
 
 RF24 radio(9,10);
 boolean registered = false;
 unsigned char Channal;
+
 // Radio pipe addresses for the 2 nodes to communicate.
 const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
 
@@ -26,6 +33,8 @@ void initialiseBoard()
     radio.printDetails();   //prints out all the nRF registars for debuging
 }
 
+/****************************************************************************/
+
 boolean readPackage(void * package,unsigned char len)
 {
     unsigned long started_waiting_at = millis();
@@ -41,6 +50,9 @@ boolean readPackage(void * package,unsigned char len)
     else Serial.println("\nTimeout fail");
     return !timeout;
 }
+
+/****************************************************************************/
+
 boolean readPackageAck(byte * package, unsigned char len, byte * ack, unsigned char lenAck)
 {
     if(readPackage(package,len))
@@ -59,6 +71,8 @@ boolean readPackageAck(byte * package, unsigned char len, byte * ack, unsigned c
     return false;
 }
 
+/****************************************************************************/
+
 boolean writePackage(void * package, unsigned char len)
 {
     radio.stopListening();
@@ -67,6 +81,7 @@ boolean writePackage(void * package, unsigned char len)
     return temp;    
 }
 
+/****************************************************************************/
 
 //SenActs keep sending their Board packages, server can read only one at a time.
 //When the server reads one, it sends the same package back as ack...
@@ -111,6 +126,8 @@ boolean registerBoard(void)
         return false;
     }
 }
+
+/****************************************************************************/
 
 boolean defineBoard(void)
 {   //if allready registered continue with defining
@@ -176,6 +193,8 @@ boolean defineBoard(void)
     return false;
 }
 
+/****************************************************************************/
+
 boolean registerAndDefineBoard(unsigned long *timerA)
 {   //if not connected senact needs to apply and define
     if(registered)
@@ -210,10 +229,14 @@ boolean registerAndDefineBoard(unsigned long *timerA)
     return false;
 }
 
+/****************************************************************************/
+
 boolean commandReceved(byte * command)
 {
     return readPackage(command, 1);
 }
+
+/****************************************************************************/
             
 boolean parseCommand(byte command)
 {    
@@ -230,10 +253,3 @@ boolean parseCommand(byte command)
     }
 }
 
-boolean packValue(void * boardValue, unsigned char nBytes, unsigned char index)
-{
-    for (byte i = 0; i < nBytes; i++)
-    {
-        Value[index][i]= *((byte*)boardValue + i);
-    }
-}

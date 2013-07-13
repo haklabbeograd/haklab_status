@@ -5,21 +5,21 @@ int main()
 {
     FILE  *fpArduinoMain,*fpBoardH,*fpBoardC,*fpPrintH,*origArduinoMain,*newBoardH,*newBoardC,*newPrintH, *read_sensors_h;
     
-    fpBoardH = fopen("Board.h","r");
+    fpBoardH = fopen("input/Board.h","r");
     newBoardH = fopen("arduino_slave/Board.h","w");
     copyFile(fpBoardH, newBoardH);
     
     fpBoardH = fopen("arduino_slave/Board.h","a++");
     
-    fpBoardC = fopen("Board.cpp","r");
+    fpBoardC = fopen("input/Board.cpp","r");
     newBoardC = fopen("arduino_slave/Board.cpp","w");
     copyFile(fpBoardC, newBoardC);
     
-    fpPrintH = fopen("printf.h","r");
+    fpPrintH = fopen("input/printf.h","r");
     newPrintH = fopen("arduino_slave/printf.h","w");
     copyFile(fpPrintH, newPrintH);
     
-    origArduinoMain = fopen("arduino_sensor_door.ino","r");
+    origArduinoMain = fopen("input/arduino_sensor_door.ino","r");
     fpArduinoMain = fopen("arduino_slave/arduino_slave.ino", "w");
     copyFile(origArduinoMain, fpArduinoMain);
     fpArduinoMain = fopen("arduino_slave/arduino_slave.ino", "a+");

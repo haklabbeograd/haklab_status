@@ -18,14 +18,10 @@
 #include <SPI.h>
 #include "RF24.h"
 #include "Board.h"
-#include "DHT.h"
-
-#define DHTPIN 8     // what pin we're connected to
-// Uncomment whatever type you're using!
-#define DHTTYPE DHT11   // DHT 11 
-
-DHT dht(DHTPIN, DHTTYPE);
-
+#include <Ultrasonic.h>
+#define TRIGGER_PIN  7
+#define ECHO_PIN     6
+Ultrasonic ultrasonic(TRIGGER_PIN, ECHO_PIN);
 //
 // Hardware configuration
 //
@@ -41,7 +37,6 @@ void setup(void)
     //
     //Enter senosr setup here
     //
-    dht.begin();
 }
 
 void loop()
@@ -78,37 +73,23 @@ void loop()
     }
 }
 
-byte Value[2][8];
+byte Value[1][8];
 
 boolean packSensor1()
 {
-	float value = readSensor1();
+	signed long int value = readSensor1();
 	void * p = &value;
 	for(int i = 0; i<4;i++)
 		Value[0][i] = *((byte*)p + i);
 }
 
-boolean packSensor2()
-{
-	float value = readSensor2();
-	void * p = &value;
-	for(int i = 0; i<4;i++)
-		Value[1][i] = *((byte*)p + i);
-}
-
 boolean packAllSensor()
 {
 	packSensor1();
-	packSensor2();
 }
 
-float readSensor1()
-{//enter code here to read the Humidity named sensor
-    return dht.readHumidity();
-}
-
-float readSensor2()
-{//enter code here to read the Temperature named sensor
-    return dht.readTemperature();
+signed long int readSensor1()
+{//enter code here to read the distance_in_msec named sensor
+    return ultrasonic.timing();
 }
 // vim:cin:ai:sts=2 sw=2 ft=cpp
