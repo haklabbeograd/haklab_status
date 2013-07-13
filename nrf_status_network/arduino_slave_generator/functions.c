@@ -84,6 +84,10 @@ void sensorPack(FILE * fp, FILE * fpArduinoMain, unsigned int nSA )
                 sprintf(theSenActs[i].typeS,"double");
                 theSenActs[i].nData = 8;
                 break;
+            case 9:
+                sprintf(theSenActs[i].typeS,"char*");
+                theSenActs[i].nData = 32;
+                break;
             default:
                 printf("error");
         }
@@ -114,10 +118,11 @@ void typeSwitch(DATATYPE *theType/*char * type*/)
         printf("\n6: signed long int    (4bytes)");
         printf("\n7: float              (4bytes)");
         printf("\n8: double             (8bytes)");
-        printf("\nEnder (0-8):");
+        printf("\n9: char[32]            (32bytes)");
+        printf("\nEnder (0-9):");
         scanf("%d", &choice);
-        if((choice>=0)&&(choice<=8))error = false;
-        else printf("\n\nError: must chose between 0 and 8");
+        if((choice>=0)&&(choice<=9))error = false;
+        else printf("\n\nError: must chose between 0 and 9");
     }
     *theType = (DATATYPE)choice;    
 }
@@ -126,7 +131,9 @@ void writeArduinoMain(FILE *fpArduinoMain, char *type, unsigned int nData,int i)
 {
     fprintf(fpArduinoMain, "\nboolean packSensor%d()\n{\n",i+1);
     fprintf(fpArduinoMain, "\t%s value = readSensor%d();\n",type,i+1);
-    fprintf(fpArduinoMain, "\tvoid * p = &value;\n");
+    fprintf(fpArduinoMain, "\tvoid * p = ");
+    if(type[strlen(type)-1] != '*')fprintf(fpArduinoMain, "&");
+    fprintf(fpArduinoMain, "value;\n");
     fprintf(fpArduinoMain, "\tfor(int i = 0; i<%d;i++)\n",nData);
     fprintf(fpArduinoMain, "\t\tValue[%d][i] = *((byte*)p + i);\n}\n",i);
 }

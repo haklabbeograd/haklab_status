@@ -18,10 +18,8 @@
 #include <SPI.h>
 #include "RF24.h"
 #include "Board.h"
-#include <Ultrasonic.h>
-#define TRIGGER_PIN  7
-#define ECHO_PIN     6
-Ultrasonic ultrasonic(TRIGGER_PIN, ECHO_PIN);
+
+
 //
 // Hardware configuration
 //
@@ -47,7 +45,7 @@ void loop()
         
         //value[0]=digitalRead(doorPin);      //read the pin
         //packValue(&value[0], 1, 0);  //pack the value from the original type to byte array
-        packAllSensor();
+        //packAllSensor();
         
         if(commandReceved(&command))//read and parse master command
         {
@@ -73,13 +71,13 @@ void loop()
     }
 }
 
-byte Value[1][8];
+byte Value[1][32] = {{'A','B','C','A','B','C','A','B','C','A','B','C','A','B','C','A','B','C','A','B','C','A','B','C','A','B','C','A','B','C','e','d'}};
 
 boolean packSensor1()
 {
-	signed long int value = readSensor1();
-	void * p = &value;
-	for(int i = 0; i<4;i++)
+	char* value = readSensor1();
+	void * p = value;
+	for(int i = 0; i<32;i++)
 		Value[0][i] = *((byte*)p + i);
 }
 
@@ -88,8 +86,7 @@ boolean packAllSensor()
 	packSensor1();
 }
 
-signed long int readSensor1()
-{//enter code here to read the distance_in_msec named sensor
-    return ultrasonic.timing();
+char* readSensor1()
+{//enter code here to read the theString named sensor
 }
 // vim:cin:ai:sts=2 sw=2 ft=cpp

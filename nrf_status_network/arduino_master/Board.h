@@ -22,7 +22,7 @@
  *
  * For use with SenAct structure
  */
-typedef enum {BOOL, U_CHAR, S_CHAR, U_INT16, S_INT16, UL_INT32, SL_INT32,FLOAT, DOUBLE } DATATYPE;
+typedef enum {BOOL, U_CHAR, S_CHAR, U_INT16, S_INT16, UL_INT32, SL_INT32,FLOAT, DOUBLE, CHAR_ARRAY } DATATYPE;
 
 /**
  * Sensor/Actuator  definition
@@ -37,7 +37,7 @@ typedef enum {SENSOR, ACTUATOR} S_OR_A;
 #define APPLICATION_CH 10
 #define DEFINITION_CH  20
 #define SIZE_OF_NAME 20
-#define MAX_DATA_SIZE   4
+#define MAX_DATA_SIZE   32
 #define PAYLOAD_SIZE 32
 
 

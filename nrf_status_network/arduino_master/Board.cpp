@@ -111,6 +111,9 @@ boolean readSensorB(SenAct * theSenAct)
                 case DOUBLE:
                     Serial.println(*((double*)theSenAct->lastReading));
                     break;
+                case CHAR_ARRAY:
+                    Serial.println((char*)theSenAct->lastReading);
+                    break;
             }
             return true;
         }
@@ -137,10 +140,10 @@ boolean readAllSonBoard(Board * theBoard)
     Serial.println((char*)theBoard->name);
     Serial.println(theBoard->channel); 
     radio.startListening();
-    
     for(int i =0;i < theBoard->nSenAct; i++)
     {
-        if( readSensorB(theBoard->arraySenAct+i) == 0 ) return 0;
+        if((theBoard->arraySenAct+i)->sOrA == SENSOR)
+            if( readSensorB(theBoard->arraySenAct+i) == 0 ) return 0;
     }
     return 1;
 }
