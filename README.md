@@ -27,4 +27,8 @@ Once connected the master will request data from the sensors on the sensor board
 ### Things to do
 ####The control script
 ####The Web interface for generating the Slave Arduino sketch from sensor data.
+Under development. Currently there is a simple C program which depending on your answers generates the Arduino_slave sketch. You only need to add the sensor specific setup procetures, and edit the readSensor#() function located at the bottom of the arduino_slave.ino file. Simply add "return 'sensor value, or function that reads the sensors'" 
+#####example1: "return dht.humidity();" 
+#####example2: "return digitalRead(pin);"
+#####example3: "return value_of_sensor;"
 ####The Web interface where the sensor data is displayed, and where the actuator control is possible.
