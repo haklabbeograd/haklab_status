@@ -35,6 +35,7 @@ void setup(void)
     //
     //Enter senosr setup here
     //
+    pinMode(8,INPUT);
 }
 
 void loop()
@@ -45,7 +46,7 @@ void loop()
         
         //value[0]=digitalRead(doorPin);      //read the pin
         //packValue(&value[0], 1, 0);  //pack the value from the original type to byte array
-        //packAllSensor();
+        packAllSensor();
         
         if(commandReceved(&command))//read and parse master command
         {
@@ -71,13 +72,13 @@ void loop()
     }
 }
 
-byte Value[1][32] = {{'A','B','C','A','B','C','A','B','C','A','B','C','A','B','C','A','B','C','A','B','C','A','B','C','A','B','C','A','B','C','e','d'}};
+byte Value[1][8];
 
 boolean packSensor1()
 {
-	char* value = readSensor1();
-	void * p = value;
-	for(int i = 0; i<32;i++)
+	boolean value = readSensor1();
+	void * p = &value;
+	for(int i = 0; i<1;i++)
 		Value[0][i] = *((byte*)p + i);
 }
 
@@ -86,7 +87,8 @@ boolean packAllSensor()
 	packSensor1();
 }
 
-char* readSensor1()
-{//enter code here to read the theString named sensor
+boolean readSensor1()
+{//enter code here to read the Brava named sensor
+    return digitalRead(8);
 }
 // vim:cin:ai:sts=2 sw=2 ft=cpp

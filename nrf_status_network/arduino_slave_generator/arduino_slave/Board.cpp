@@ -243,7 +243,7 @@ boolean parseCommand(byte command)
     Serial.print(command,HEX);
     if(command < 0xf0)
     {
-        writePackage(Value[command],nDataS[command]);
+        writePackage(&(Value[command]),nDataS[command]);
     }
     else if (command == 0xf0)
     {

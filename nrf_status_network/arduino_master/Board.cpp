@@ -65,19 +65,19 @@ void mapFreeCH()
     //test printing
     for (int i =0; i<nFreeCH;i++)
     {
-        Serial.println(freeCH[i]);
+        //Serial.println(freeCH[i]);
     }
-    Serial.println("");
-    Serial.print(freeCH[nextFreeCH]);
-    Serial.println("");
+    //Serial.println("");
+    //Serial.print(freeCH[nextFreeCH]);
+    //Serial.println("");
 }
 
 /****************************************************************************/
 
 boolean readSensorB(SenAct * theSenAct)
 {
-    Serial.print((char*)theSenAct->name);
-    Serial.print(": ");
+    //Serial.print((char*)theSenAct->name);
+    //Serial.print(": ");
     if(writePackage(&(theSenAct->nSA),1))
     {
         if(readPackage(theSenAct->lastReading, theSenAct->nData))
@@ -85,34 +85,39 @@ boolean readSensorB(SenAct * theSenAct)
             switch(theSenAct->type)
             {
                 case BOOL:
+                    //Serial.println(*((boolean*)theSenAct->lastReading));
+                    Serial.print(theSenAct->name);
+                    Serial.print('\t');
                     Serial.println(*((boolean*)theSenAct->lastReading));
                     break;
                 case U_CHAR:
-                    Serial.println(*((unsigned char*)theSenAct->lastReading));
+                    //Serial.println(*((unsigned char*)theSenAct->lastReading));
                     break;
                 case S_CHAR:
-                    Serial.println(*((signed char*)theSenAct->lastReading));
+                    //Serial.println(*((signed char*)theSenAct->lastReading));
                     break;
                 case U_INT16:
-                    Serial.println(*((unsigned int*)theSenAct->lastReading));
+                    //Serial.println(*((unsigned int*)theSenAct->lastReading));
                     break;
                 case S_INT16:
-                    Serial.println(*((signed int*)theSenAct->lastReading));
+                    //Serial.println(*((signed int*)theSenAct->lastReading));
                     break;
                 case UL_INT32:
-                    Serial.println(*((unsigned long int*)theSenAct->lastReading));
+                    //Serial.println(*((unsigned long int*)theSenAct->lastReading));
                     break;
                 case SL_INT32:
-                    Serial.println(*((signed long int*)theSenAct->lastReading));
+                    //Serial.println(*((signed long int*)theSenAct->lastReading));
                     break;
                 case FLOAT:
+                    Serial.print(theSenAct->name);
+                    Serial.print('\t');
                     Serial.println(*((float*)theSenAct->lastReading));
                     break;
                 case DOUBLE:
-                    Serial.println(*((double*)theSenAct->lastReading));
+                    //Serial.println(*((double*)theSenAct->lastReading));
                     break;
                 case CHAR_ARRAY:
-                    Serial.println((char*)theSenAct->lastReading);
+                    //Serial.println((char*)theSenAct->lastReading);
                     break;
             }
             return true;
@@ -137,8 +142,8 @@ boolean readAllSonBoard(Board * theBoard)
     radio.stopListening();
     
     radio.setChannel(theBoard->channel);
-    Serial.println((char*)theBoard->name);
-    Serial.println(theBoard->channel); 
+    //Serial.println((char*)theBoard->name);
+    //Serial.println(theBoard->channel); 
     radio.startListening();
     for(int i =0;i < theBoard->nSenAct; i++)
     {
@@ -172,7 +177,7 @@ boolean readPackage(void * package,unsigned char len)
     {
         timeout = !radio.read(package, len);
     }
-    else Serial.println("\nTimeout fail");
+    //else Serial.println("\nTimeout fail");
     return !timeout;
            
 } 
@@ -214,16 +219,16 @@ void unpackBoard(Board* theBoard, byte * package)
 {
     int i =0;
 
-    Serial.print("Board name: ");
+    //Serial.print("Board name: ");
     for(i = 0; i < SIZE_OF_NAME; i++)
     {
         theBoard->name[i] = (char)package[i];
-        Serial.print(theBoard->name[i]);
+        //Serial.print(theBoard->name[i]);
     }
-    Serial.println("");
+    //Serial.println("");
     theBoard->nSenAct = (unsigned char)package[SIZE_OF_NAME];
-    Serial.print("Number of Sensors/Actuators: ");
-    Serial.print(theBoard->nSenAct);
+    //Serial.print("Number of Sensors/Actuators: ");
+    //Serial.print(theBoard->nSenAct);
 }
 
 /****************************************************************************/
@@ -244,25 +249,25 @@ void packSenAct(SenAct theSenAct, byte * package)
 void unpackSenAct(SenAct* theSenAct, byte * package)
 {
     int i =0;
-    Serial.print("\nSensor/Actuator name: ");
+    //Serial.print("\nSensor/Actuator name: ");
     for(i = 0; i < SIZE_OF_NAME; i++)
     {
         (*theSenAct).name[i] = (char) package[i];
-        Serial.print((*theSenAct).name[i]);
+        //Serial.print((*theSenAct).name[i]);
     }
-    Serial.println("");
-    Serial.print("Data_type: ");
+    //Serial.println("");
+    //Serial.print("Data_type: ");
     theSenAct->type = (DATATYPE) package[SIZE_OF_NAME];
-    Serial.println(theSenAct->type,DEC);
-    Serial.print("Number of data bytes: ");
+    //Serial.println(theSenAct->type,DEC);
+    //Serial.print("Number of data bytes: ");
     theSenAct->nData = (unsigned char) package[SIZE_OF_NAME + 1];
-    Serial.println(theSenAct->nData,DEC);
-    Serial.print("Sensor or Acuator: ");
+    //Serial.println(theSenAct->nData,DEC);
+    //Serial.print("Sensor or Acuator: ");
     theSenAct->sOrA = (S_OR_A) package[SIZE_OF_NAME + 2];
-    Serial.println(theSenAct->sOrA,DEC);
-    Serial.print("Sensor number: ");
+    //Serial.println(theSenAct->sOrA,DEC);
+    //Serial.print("Sensor number: ");
     theSenAct->nSA = (unsigned char) package[SIZE_OF_NAME + 3];
-    Serial.println(theSenAct->nSA,DEC);
+    //Serial.println(theSenAct->nSA,DEC);
 }
 
 /****************************************************************************/
@@ -339,7 +344,7 @@ boolean newBoardDefine()
             if(readPackage(package,32))
             {
                 unpackSenAct( &SenActs[nSenActs],package);
-                Serial.println((char*)SenActs[nSenActs].name);
+                //Serial.println((char*)SenActs[nSenActs].name);
                 nSenActs++;
             }
             else

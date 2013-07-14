@@ -133,7 +133,7 @@ boolean parseCommand(byte command);
    */
 boolean packAllSensor();
 
-extern byte Value[1][32];
-char* readSensor1();
+extern byte Value[1][8];
+boolean readSensor1();
 
 #endif

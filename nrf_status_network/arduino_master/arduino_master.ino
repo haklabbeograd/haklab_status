@@ -30,19 +30,19 @@ void setup(void)
 {
 
     initialiseBoard();
-    Serial.println("\nFinished init");
+    //Serial.println("\nFinished init");
 }
 
 void loop()
 {    
     byte k =1;
-    Serial.println("\nNumber of Boards connected: ");
-    Serial.println(nBoards);
+    //Serial.println("\nNumber of Boards connected: ");
+    //Serial.println(nBoards);
     
     //Reads through all the boards and their sensors    
     if(nBoards)
     {    
-        Serial.println("\nentered readout");
+        //Serial.println("\nentered readout");
         for(int i = 0; i < nBoards; i++)
         {
             readAllSonBoard(&(Boards[i]));
@@ -61,7 +61,7 @@ void loop()
         {
             if(newBoardDefine()) 
             {
-                Serial.println("\nBoard added: ");
+                //Serial.println("\nBoard added: ");
             }
             else;
         }
