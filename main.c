@@ -46,7 +46,7 @@ int main() {
     char *timestr;
     while (working) {
         count = read(fd, buf, 255);
-        buf[count] = 0;
+        buf[count - 1] = 0;
         printf("%s\n", buf);
 
         if (!strncmp(buf, "Brava\t", 6)) {
@@ -55,7 +55,6 @@ int main() {
             brava.add_field(&brava, "time", timestr);
             brava.post_revision(&brava);
             free(timestr);
-            //printf("Brava revision from update: %s\n", brava.rev);
         }
         if (!strncmp(buf, "Temperature\t", 12)) {
             temperature.add_field(&temperature, "value", buf + 12);
@@ -63,7 +62,6 @@ int main() {
             temperature.add_field(&temperature, "time", timestr);
             temperature.post_revision(&temperature);
             free(timestr);
-            //printf("Temperature revision from update: %s\n", temperature.rev);
         }
         if (!strncmp(buf, "Humidity\t", 9)) {
             humidity.add_field(&humidity, "value", buf + 9);
@@ -71,9 +69,8 @@ int main() {
             humidity.add_field(&humidity, "time", timestr);
             humidity.post_revision(&humidity);
             free(timestr);
-            //printf("Humidity revision from update: %s\n", humidity.rev);
         }
-        if (!strncmp(buf, "OK", 2)) working = 0;
+        if (!strncmp(buf, "EXIT", 5)) working = 0;
     }
 
     brava.clean(&brava);
