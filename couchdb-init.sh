@@ -15,14 +15,14 @@ fi
 
 echo -n "Initialising CouchDB... "
 
+curl -s -X DELETE http://${auth}localhost:5984/haklab_status >/dev/null
 (
-    curl -s -X DELETE http://${auth}localhost:5984/hacklab_status
-    curl -s -X PUT http://${auth}localhost:5984/hacklab_status
-    curl -s -X POST http://${auth}localhost:5984/hacklab_status \
+    curl -s -X PUT http://${auth}localhost:5984/haklab_status
+    curl -s -X POST http://${auth}localhost:5984/haklab_status \
     -H "Content-Type: application/json" -d '{ "_id": "brava"}'
-    curl -s -X POST http://${auth}localhost:5984/hacklab_status \
+    curl -s -X POST http://${auth}localhost:5984/haklab_status \
     -H "Content-Type: application/json" -d '{ "_id": "temperature"}'
-    curl -s -X POST http://${auth}localhost:5984/hacklab_status \
+    curl -s -X POST http://${auth}localhost:5984/haklab_status \
     -H "Content-Type: application/json" -d '{ "_id": "humidity"}'
 ) |\
 tee couchdb-init |\
