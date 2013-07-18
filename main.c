@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <time.h>
+#include <ctype.h>
 
 #include "couchdb.h"
 
@@ -13,16 +14,59 @@
 #define SERIAL_PORT "/dev/ttyACM0"
 
 int main() {
-    couchdb_doc brava;
-    brava = couchdb_document_init("http://localhost:5984/hacklab_status", "brava");
-    couchdb_doc temperature;
-    temperature = couchdb_document_init("http://localhost:5984/hacklab_status", "temperature");
-    couchdb_doc humidity;
-    humidity = couchdb_document_init("http://localhost:5984/hacklab_status", "humidity");
+    FILE *f;
+    char *s, *e;
+    int line, len;
 
     int fd, working, count;
     struct termios tos;
     char buf[255];
+
+    char *database = 0;
+    couchdb_doc *doc = 0;
+    int docc = 0;
+
+    f = fopen("couchdb.conf", "r");
+    if (!f) {
+        perror("couchdb.conf");
+        exit(-1);
+    }
+
+    void conferror() {
+        printf("Error in couchdb.conf on line %d.\n", line);
+        exit(1);
+    }
+
+    line = 0;
+    while (fgets(buf, sizeof(buf), f)) {
+        line++;
+        s = buf;
+        s[strlen(s) - 1] = 0;
+        if ((e = index(s, '#'))) *e = 0;
+        if ((e = index(s, ';'))) *e = 0;
+
+        while (isspace(*s)) s++;
+        if (!*s) continue;
+
+        len = strlen(s) - 1;
+        while (isspace(s[len])) s[len--] = 0;
+        if (!*s) continue;
+
+        if (s[0] == '[') {
+            len = strlen(s);
+            if (s[--len] != ']') conferror();
+            s[len] = 0;
+            if (database) free(database);
+            database = strdup(++s);
+        } else if (database) {
+            doc = realloc(doc, ++docc * sizeof(couchdb_doc));
+            doc[docc -1]  = couchdb_document_init(database, s);
+        }
+    }
+    if (database) free(database);
+    fclose(f);
+
+    if (!docc) printf("Warning: No documents defined.\n");
 
     fd = open(SERIAL_PORT, O_RDWR | O_NOCTTY);
     if (fd < 0) {
@@ -44,36 +88,27 @@ int main() {
     printf("Listening...\n");
 
     char *timestr;
+    int i;
     while (working) {
         count = read(fd, buf, 255);
         buf[count - 1] = 0;
         printf("%s\n", buf);
 
-        if (!strncmp(buf, "Brava\t", 6)) {
-            brava.add_field(&brava, "value", buf + 6);
-            asprintf(&timestr, "%u", (unsigned int)time(0));
-            brava.add_field(&brava, "time", timestr);
-            brava.post_revision(&brava);
-            free(timestr);
-        }
-        if (!strncmp(buf, "Temperature\t", 12)) {
-            temperature.add_field(&temperature, "value", buf + 12);
-            asprintf(&timestr, "%u", (unsigned int)time(0));
-            temperature.add_field(&temperature, "time", timestr);
-            temperature.post_revision(&temperature);
-            free(timestr);
-        }
-        if (!strncmp(buf, "Humidity\t", 9)) {
-            humidity.add_field(&humidity, "value", buf + 9);
-            asprintf(&timestr, "%u", (unsigned int)time(0));
-            humidity.add_field(&humidity, "time", timestr);
-            humidity.post_revision(&humidity);
-            free(timestr);
+        for (i = 0; i < docc; i++) {
+            len = strlen(doc[i].id);
+            if ((!strncmp(buf, doc[i].id, len - 1)) && (buf[len] == '\t')) {
+                doc[i].add_field(&doc[i], "value", buf + len + 1);
+                asprintf(&timestr, "%u", (unsigned int)time(0));
+                doc[i].add_field(&doc[i], "time", timestr);
+                doc[i].post_revision(&doc[i]);
+                free(timestr);
+            }
         }
         if (!strncmp(buf, "EXIT", 5)) working = 0;
     }
 
-    brava.clean(&brava);
+    for (i = 0; i < docc; i++) doc[i].clean(&doc[i]);
+    free(doc);
 
     return 0;
 }

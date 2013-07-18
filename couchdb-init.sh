@@ -19,11 +19,11 @@ curl -s -X DELETE http://${auth}localhost:5984/haklab_status >/dev/null
 (
     curl -s -X PUT http://${auth}localhost:5984/haklab_status
     curl -s -X POST http://${auth}localhost:5984/haklab_status \
-    -H "Content-Type: application/json" -d '{ "_id": "brava"}'
+    -H "Content-Type: application/json" -d '{ "_id": "Brava"}'
     curl -s -X POST http://${auth}localhost:5984/haklab_status \
-    -H "Content-Type: application/json" -d '{ "_id": "temperature"}'
+    -H "Content-Type: application/json" -d '{ "_id": "Temperature"}'
     curl -s -X POST http://${auth}localhost:5984/haklab_status \
-    -H "Content-Type: application/json" -d '{ "_id": "humidity"}'
+    -H "Content-Type: application/json" -d '{ "_id": "Humidity"}'
 ) |\
 tee couchdb-init |\
 grep error |\
