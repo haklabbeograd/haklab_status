@@ -26,10 +26,13 @@ int main() {
     couchdb_doc *doc = 0;
     int docc = 0;
 
-    f = fopen("couchdb.conf", "r");
+    f = fopen("/etc/haklab-status/couchdb.conf", "r");
     if (!f) {
-        perror("couchdb.conf");
-        exit(-1);
+        f = fopen("couchdb.conf", "r");
+        if (!f) {
+            perror("couchdb.conf");
+            exit(-1);
+        }
     }
 
     void conferror() {

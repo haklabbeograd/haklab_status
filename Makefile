@@ -7,7 +7,7 @@ make: haklab-status
 
 all: haklab-status couchdb-init
 
-.PHONY: make all haklab-status run clean-all clean couchdb-clean
+.PHONY: make all haklab-status run install uninstall clean-all clean couchdb-clean
 
 haklab-status:
 	$(CC) main.c couchdb.c -o haklab-status $(LIBS) $(CFLAGS)
@@ -17,6 +17,15 @@ run: haklab-status
 
 couchdb-init:
 	./couchdb-init.sh
+
+install: haklab-status
+	mkdir -p /etc/haklab-status
+	cp haklab-status /usr/bin/
+	cp couchdb.conf.example /etc/haklab-status/
+	touch /etc/haklab-status/couchdb.conf
+
+uninstall:
+	rm -rf /usr/bin/haklab-status /etc/haklab-status/
 
 clean-all: clean couchdb-clean
 
