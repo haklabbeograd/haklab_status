@@ -90,7 +90,7 @@ int main() {
     working = 1;
     printf("Listening...\n");
 
-    char *timestr;
+    char *timestr, *namestr;
     int i;
     while (working) {
         count = read(fd, buf, 255);
@@ -100,10 +100,17 @@ int main() {
         for (i = 0; i < docc; i++) {
             len = strlen(doc[i].id);
             if ((!strncmp(buf, doc[i].id, len - 1)) && (buf[len] == '\t')) {
+                buf[len] = 0;
+                asprintf(&namestr, "\"%s\"", buf);
+                doc[i].add_field(&doc[i], "name", namestr);
+
                 doc[i].add_field(&doc[i], "value", buf + len + 1);
+
                 asprintf(&timestr, "%u", (unsigned int)time(0));
                 doc[i].add_field(&doc[i], "time", timestr);
                 doc[i].post_revision(&doc[i]);
+
+                free(namestr);
                 free(timestr);
             }
         }

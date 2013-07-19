@@ -114,7 +114,7 @@ char *couchdb_document_post_revision(couchdb_doc *doc) {
     if (doc->first_field) {
         field = doc->first_field;
         while (field) {
-            asprintf(&fields, "%s,\"%s\":\"%s\"", f, field->key, field->value);
+            asprintf(&fields, "%s,\"%s\":%s", f, field->key, field->value);
             free(f);
             f = fields;
             doc->last_field = field;
