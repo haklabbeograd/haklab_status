@@ -127,7 +127,11 @@ char *couchdb_document_post_revision(couchdb_doc *doc) {
     asprintf(&json, "{%s}", fields + 1);
     free(fields);
 
-    //printf("Request: %s\n", json);
+    printf("Request: %s\n", json);
+
+    // TODO: Read auth data from configuration file
+    curl_easy_setopt(curl, CURLOPT_USERPWD, "haklab:haklab");
+
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json);
 
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &rvd);
