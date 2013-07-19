@@ -80,7 +80,7 @@ int main() {
     bzero(&tos, sizeof(tos));
 
     tos.c_cflag = BAUDRATE | CRTSCTS | CS8 | CLOCAL | CREAD;
-    tos.c_iflag = IGNPAR;
+    tos.c_iflag = IGNPAR | IGNCR;
     tos.c_oflag = 0;
     tos.c_lflag = ICANON;
 
