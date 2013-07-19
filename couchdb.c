@@ -94,9 +94,6 @@ char *couchdb_document_get_revision(couchdb_doc *doc) {
 }
 
 char *couchdb_document_post_revision(couchdb_doc *doc) {
-    if (!doc->rev)
-        if (!couchdb_document_get_revision(doc))
-            return 0;
     char *rev = 0;
     struct revdata rvd = {"rev", &rev};
 
@@ -126,8 +123,8 @@ char *couchdb_document_post_revision(couchdb_doc *doc) {
         }
         doc->first_field = doc->last_field = 0;
     }
-    asprintf(&json, "{\"_id\":\"%s\",\"_rev\":\"%s\"%s}",
-             doc->id, doc->rev, fields);
+
+    asprintf(&json, "{%s}", fields + 1);
     free(fields);
 
     //printf("Request: %s\n", json);

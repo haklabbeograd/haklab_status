@@ -16,15 +16,8 @@ fi
 echo -n "Initialising CouchDB... "
 
 curl -s -X DELETE http://${auth}localhost:5984/haklab_status >/dev/null
-(
-    curl -s -X PUT http://${auth}localhost:5984/haklab_status
-    curl -s -X POST http://${auth}localhost:5984/haklab_status \
-    -H "Content-Type: application/json" -d '{ "_id": "Brava"}'
-    curl -s -X POST http://${auth}localhost:5984/haklab_status \
-    -H "Content-Type: application/json" -d '{ "_id": "Temperature"}'
-    curl -s -X POST http://${auth}localhost:5984/haklab_status \
-    -H "Content-Type: application/json" -d '{ "_id": "Humidity"}'
-) |\
+
+curl -s -X PUT http://${auth}localhost:5984/haklab_status |\
 tee couchdb-init |\
 grep error |\
 if [ $(wc -l) == "0" ]; then
