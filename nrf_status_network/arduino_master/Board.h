@@ -31,6 +31,17 @@ typedef enum {BOOL, U_CHAR, S_CHAR, U_INT16, S_INT16, UL_INT32, SL_INT32,FLOAT, 
  */
 typedef enum {SENSOR, ACTUATOR} S_OR_A;
 
+/**
+ * Sensor is interrupt or request based
+ * 
+ * If request based then the Master recives commands from the router to read the sensor.
+ * If interrupt based, the Master will poll the sensor periodicly to check for changes
+ * and report to the Router.
+ * 
+ * For use with SenAct structure
+ */
+typedef enum {REQUEST, INTERRUPT} REQ_OR_INT;
+
 //Board specific defines
 #define MAX_N_BOARDS 8
 #define MAX_N_SENACT 10
@@ -52,6 +63,7 @@ struct senact
     unsigned char nData;            /**< Number of bytes for value sensor/actuator */
     S_OR_A  sOrA;                   /**< Sensor or Actuator */
     unsigned char nSA;              /**< Number of sensor on Board */
+    REQ_OR_INT reqOrInt;            /**< Request or Interrupt */
     byte lastReading[MAX_DATA_SIZE];/**< Last read value of sensor/actuator */
 };
 
@@ -173,6 +185,14 @@ boolean readSensorB(SenAct * theSenAct);
    * @return            True if all readings are succesfull, fail if not
    */
 boolean readAllSonBoard(Board * theBoard);
+
+  /**
+   * Reads all Sensors that are interrupt from from a Board
+   * 
+   * @param theBoard    Which Board to read from
+   * @return            True if all readings are succesfull, fail if not
+   */
+boolean readAllSwIntonBoard(Board * theBoard)
 
 /**
  * Checks the Registration channel if any boards are available on it.

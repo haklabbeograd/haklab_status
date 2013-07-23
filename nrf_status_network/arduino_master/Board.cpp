@@ -155,6 +155,25 @@ boolean readAllSonBoard(Board * theBoard)
 
 /****************************************************************************/
 
+boolean readAllSwIntonBoard(Board * theBoard)
+{
+    radio.stopListening();
+    
+    radio.setChannel(theBoard->channel);
+    //Serial.println((char*)theBoard->name);
+    //Serial.println(theBoard->channel); 
+    radio.startListening();
+    for(int i =0;i < theBoard->nSenAct; i++)
+    {
+        if((theBoard->arraySenAct+i)->reqOrInt == INTERRUPT)
+            if((theBoard->arraySenAct+i)->sOrA == SENSOR)
+                if( readSensorB(theBoard->arraySenAct+i) == 0 ) return 0;
+    }
+    return 1;
+}
+
+/****************************************************************************/
+
 boolean writePackage(void * package, unsigned char len)
 {
     radio.stopListening();
@@ -268,6 +287,7 @@ void unpackSenAct(SenAct* theSenAct, byte * package)
     //Serial.print("Sensor number: ");
     theSenAct->nSA = (unsigned char) package[SIZE_OF_NAME + 3];
     //Serial.println(theSenAct->nSA,DEC);
+    theSensAct->reqOrInt = (REQ_OR_INT) package[SIZE_OF_NAME + 4]
 }
 
 /****************************************************************************/

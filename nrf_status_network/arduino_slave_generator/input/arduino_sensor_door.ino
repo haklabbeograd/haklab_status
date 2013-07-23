@@ -58,7 +58,7 @@ void loop()
         }
         
         //Timer function disconects after 50s if no command is receved
-        if(millis()-timerA > 50000)
+        if(millis()-timerA > 10000)
             {
                 connected = false;
                 Serial.println("\nTimer Conn has gone");

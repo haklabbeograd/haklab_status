@@ -94,7 +94,8 @@ void sensorPack(FILE * fp, FILE * fpArduinoMain, unsigned int nSA )
         fprintf(fp,", 0x%X",theSenActs[i].type);
         fprintf(fp,", 0x%X",theSenActs[i].nData);    
         fprintf(fp,", 0x%X",SENSOR);
-        fprintf(fp,", 0x%X",i);  
+        fprintf(fp,", 0x%X",i);
+        fprintf(fp,", 0x%X",theSenActs[i].reqOrInt);  
         if(i== (theBoard.nSenAct - 1))fprintf(fp," }\n");
         else fprintf(fp," },\n");
         writeArduinoMain(fpArduinoMain,theSenActs[i].typeS, theSenActs[i].nData, i);    
@@ -154,11 +155,23 @@ void BoardGenerate()
 void SensorGenerate(int index)
 {
     char SensorName[100];
-    printf("\nEnter the Sensor Name: ");
+    printf("\nEnter the Sensor%d Name: ", index+1);
     scanf("%s", SensorName);
     if(strlen(SensorName)>MAX_SIZE_OF_NAME)SensorName[MAX_SIZE_OF_NAME] = 0;
     strncpy ( theSenActs[index].name, SensorName, MAX_SIZE_OF_NAME );
     typeSwitch(&theSenActs[index].type);
+    unsigned char tmp, error = 0;
+    do
+    {
+        printf("\nShould the sensor interrupt or respond to reqests?");
+        printf("\n0: respond");
+        printf("\n1: interrupt");
+        printf("\nEnter 0-1: ");
+        scanf("%d", &tmp);
+        if((tmp != 1) && (tmp != 0)) error = 1;
+        else error = 0;
+    }while (error);
+    theSenActs[index].reqOrInt = (REQ_OR_INT)tmp;
 }
 
 void printReadFunctionsH(FILE *fp)

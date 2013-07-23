@@ -23,6 +23,19 @@ typedef enum {SENSOR, ACTUATOR} S_OR_A;
 /**
  * Sensor/Actuator stucture
  */
+ 
+ /**
+ * Sensor is interrupt or request based
+ * 
+ * If request based then the Master recives commands from the router to read the sensor.
+ * If interrupt based, the Master will poll the sensor periodicly to check for changes
+ * and report to the Router.
+ * 
+ * For use with SenAct structure
+ */
+typedef enum {REQUEST, INTERRUPT} REQ_OR_INT;
+
+
 typedef struct senact
 {
     char name[MAX_SIZE_OF_NAME+1];      /**< Name of sensor/actuator */
@@ -31,6 +44,7 @@ typedef struct senact
     unsigned char nData;                /**< Number of bytes for value sensor/actuator */
     S_OR_A  sOrA;                       /**< Sensor or Actuator */
     unsigned char nSA;                  /**< Number of sensor on Board */
+    REQ_OR_INT reqOrInt;                /**< Request or Interrupt */
     
 }SenAct;
 

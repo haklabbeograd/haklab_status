@@ -35,7 +35,6 @@ void setup(void)
     //
     //Enter senosr setup here
     //
-    pinMode(8,INPUT);
 }
 
 void loop()
@@ -72,23 +71,35 @@ void loop()
     }
 }
 
-byte Value[1][8];
+byte Value[2][8];
 
 boolean packSensor1()
 {
-	boolean value = readSensor1();
+	float value = readSensor1();
 	void * p = &value;
-	for(int i = 0; i<1;i++)
+	for(int i = 0; i<4;i++)
 		Value[0][i] = *((byte*)p + i);
+}
+
+boolean packSensor2()
+{
+	float value = readSensor2();
+	void * p = &value;
+	for(int i = 0; i<4;i++)
+		Value[1][i] = *((byte*)p + i);
 }
 
 boolean packAllSensor()
 {
 	packSensor1();
+	packSensor2();
 }
 
-boolean readSensor1()
-{//enter code here to read the Brava named sensor
-    return digitalRead(8);
+float readSensor1()
+{//enter code here to read the Humidity named sensor
+}
+
+float readSensor2()
+{//enter code here to read the Temperature named sensor
 }
 // vim:cin:ai:sts=2 sw=2 ft=cpp

@@ -45,7 +45,7 @@ void loop()
         //Serial.println("\nentered readout");
         for(int i = 0; i < nBoards; i++)
         {
-            readAllSonBoard(&(Boards[i]));
+            readAllSwIntonBoard(&(Boards[i]));
             delay(250);
         }
         delay(2500);
