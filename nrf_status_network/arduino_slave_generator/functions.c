@@ -30,7 +30,7 @@ void sensorPack(FILE * fp, FILE * fpArduinoMain, unsigned int nSA )
 {
     fprintf(fp,"//The Sensors pack\n");
     fprintf(fp,"byte Sensors[%d][32] = \n{\n",nSA);  
-    int i;
+    unsigned int i;
     for(i = 0; i < nSA;i++)
     {
         SensorGenerate(i);
@@ -167,7 +167,7 @@ void SensorGenerate(int index)
         printf("\n0: respond");
         printf("\n1: interrupt");
         printf("\nEnter 0-1: ");
-        scanf("%d", &tmp);
+        scanf("%c", &tmp);
         if((tmp != 1) && (tmp != 0)) error = 1;
         else error = 0;
     }while (error);
