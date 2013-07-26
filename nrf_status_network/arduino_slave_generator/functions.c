@@ -10,7 +10,7 @@ void boardPack(FILE * fp)
     int kk;
     for( kk = strlen(theBoard.name);kk<MAX_SIZE_OF_NAME;kk++)fputc('0',fp);
     char temp[10];
-    itoa(theBoard.nSenAct,temp,10);
+    snprintf(temp,sizeof(temp),"%d",theBoard.nSenAct);
     fprintf(fp,"%s",temp);
     fprintf(fp,"\nbyte boardPack[32] = { 0x%X",theBoard.name[0]);
     int i = 1;
