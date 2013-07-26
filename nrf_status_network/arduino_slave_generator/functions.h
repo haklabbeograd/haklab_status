@@ -11,7 +11,7 @@
  *
  * For use with SenAct structure
  */
-typedef enum {BOOL, U_CHAR, S_CHAR, U_INT16, S_INT16, UL_INT32, SL_INT32,FLOAT, DOUBLE } DATATYPE;
+typedef enum {BOOL, U_CHAR, S_CHAR, U_INT16, S_INT16, UL_INT32, SL_INT32,FLOAT, DOUBLE, CHAR_P} DATATYPE;
 
 /**
  * Sensor/Actuator  definition
