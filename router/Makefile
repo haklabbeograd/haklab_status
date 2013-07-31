@@ -1,13 +1,13 @@
 #!/usr/bin/make
 CC=gcc
-CFLAGS=-g -Wall -I. $$(curl-config --cflags)
+CFLAGS=-g -Wall -I.
 LIBS=$$(curl-config --libs)
 
 make: haklab-status
 
 all: haklab-status couchdb-init
 
-.PHONY: make all haklab-status run install uninstall clean-all clean couchdb-clean
+.PHONY: make all haklab-status run install uninstall openwrt clean-all clean couchdb-clean
 
 haklab-status:
 	$(CC) main.c couchdb.c -o haklab-status $(LIBS) $(CFLAGS)
