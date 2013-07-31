@@ -27,6 +27,15 @@ install: haklab-status
 uninstall:
 	rm -rf /usr/bin/haklab-status /etc/haklab-status/
 
+openwrt:
+	test $${OPENWRT_DIR}
+	rm -rf $(OPENWRT_DIR)/package/haklab-status
+	mkdir -p $(OPENWRT_DIR)/package/haklab-status/src
+	cp -r . $(OPENWRT_DIR)/package/haklab-status/src
+	cd $(OPENWRT_DIR)/package/haklab-status/src/openwrt; mv Makefile ../..
+	$(OPENWRT_DIR)/scripts/feeds update packages
+	$(OPENWRT_DIR)/scripts/feeds install libcurl
+
 clean-all: clean couchdb-clean
 
 clean:
