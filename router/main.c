@@ -18,7 +18,7 @@ int main() {
     char *s, *e;
     int line, len;
 
-    int fd, working, count;
+    int fd, count;
     struct termios tos;
     char buf[255];
 
@@ -87,12 +87,11 @@ int main() {
     tcflush(fd, TCIFLUSH);
     tcsetattr(fd, TCSANOW, &tos);
 
-    working = 1;
     printf("Listening...\n");
 
     char *timestr, *namestr;
     int i;
-    while (working) {
+    while (1) {
         count = read(fd, buf, 255);
         buf[count - 1] = 0;
         printf("%s\n", buf);
@@ -114,7 +113,6 @@ int main() {
                 free(timestr);
             }
         }
-        if (!strncmp(buf, "EXIT", 5)) working = 0;
     }
 
     for (i = 0; i < docc; i++) doc[i].clean(&doc[i]);
