@@ -21,8 +21,10 @@ couchdb-init:
 install: haklab-status
 	mkdir -p /etc/haklab-status
 	cp haklab-status /usr/bin/
-	cp couchdb.conf.example /etc/haklab-status/
-	touch /etc/haklab-status/couchdb.conf
+	cp *.conf.example /etc/haklab-status/
+
+	cp -n main.conf.example /etc/haklab-status/main.conf
+	cp -n couchdb.conf.example /etc/haklab-status/couchdb.conf
 
 uninstall:
 	rm -rf /usr/bin/haklab-status /etc/haklab-status/
