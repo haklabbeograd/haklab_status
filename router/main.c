@@ -10,10 +10,11 @@
 
 #include "couchdb.h"
 
-#define BAUDRATE B57600
-#define SERIAL_PORT "/dev/ttyACM0"
+unsigned int BAUDRATE = B57600;
+char *SERIAL_PORT;
 
 int main() {
+    asprintf(&SERIAL_PORT, "/dev/ttyACM0");
     FILE *f;
     char *s, *e;
     int line, len;
@@ -115,6 +116,7 @@ int main() {
 
     for (i = 0; i < docc; i++) doc[i].clean(&doc[i]);
     free(doc);
+    free(SERIAL_PORT);
 
     return 0;
 }
