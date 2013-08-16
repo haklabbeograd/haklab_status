@@ -35,11 +35,6 @@ int main() {
         }
     }
 
-    void conferror() {
-        printf("Error in couchdb.conf on line %d.\n", line);
-        exit(1);
-    }
-
     line = 0;
     while (fgets(buf, sizeof(buf), f)) {
         line++;
@@ -57,7 +52,10 @@ int main() {
 
         if (s[0] == '[') {
             len = strlen(s);
-            if (s[--len] != ']') conferror();
+            if (s[--len] != ']') {
+                printf("Error in couchdb.conf on line %d.\n", line);
+                exit(1);
+            }
             s[len] = 0;
             if (database) free(database);
             database = strdup(++s);
