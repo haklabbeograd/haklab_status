@@ -27,6 +27,59 @@ int main() {
     couchdb_doc *doc = 0;
     int docc = 0;
 
+    f = fopen("/etc/haklab-status/main.conf", "r");
+    if (!f) {
+        f = fopen("main.conf", "r");
+        if (!f) {
+            perror("main.conf");
+            exit(-1);
+        }
+    }
+
+    line = 0;
+    while (fgets(buf, sizeof(buf), f)) {
+        line++;
+        s = buf;
+        s[strlen(s) - 1] = 0;
+        if ((e = index(s, '#'))) *e = 0;
+        if ((e = index(s, ';'))) *e = 0;
+
+        while (isspace(*s)) s++;
+        if (!*s) continue;
+
+        len = strlen(s) - 1;
+        while (isspace(s[len])) s[len--] = 0;
+        if (!*s) continue;
+
+        if ((e = index(s, '='))) {
+            *e++ = 0;
+            len = strlen(s) - 1;
+            while (isspace(s[len])) s[len--] = 0;
+            while (isspace(*e)) e++;
+            if (*s == 0) {
+                printf("Syntax error in main.conf on line %d.\n", line);
+                exit(1);
+            }
+            if (!strcmp("port", s)) {
+                free(SERIAL_PORT);
+                asprintf(&SERIAL_PORT, "%s", e);
+            }
+            if (!strcmp("baudrate", s)) {
+                if (!strcmp("300", e)) BAUDRATE = B300;
+                if (!strcmp("600", e)) BAUDRATE = B600;
+                if (!strcmp("1200", e)) BAUDRATE = B1200;
+                if (!strcmp("2400", e)) BAUDRATE = B2400;
+                if (!strcmp("4800", e)) BAUDRATE = B4800;
+                if (!strcmp("9600", e)) BAUDRATE = B9600;
+                if (!strcmp("19200", e)) BAUDRATE = B19200;
+                if (!strcmp("38400", e)) BAUDRATE = B38400;
+                if (!strcmp("57600", e)) BAUDRATE = B57600;
+                if (!strcmp("115200", e)) BAUDRATE = B115200;
+            }
+        }
+    }
+    fclose(f);
+
     f = fopen("/etc/haklab-status/couchdb.conf", "r");
     if (!f) {
         f = fopen("couchdb.conf", "r");
