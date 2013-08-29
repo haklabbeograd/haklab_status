@@ -145,6 +145,7 @@ int main() {
     int i;
     while (1) {
         count = read(fd, buf, 255);
+        if (!count) break;
         buf[count - 1] = 0;
         printf("%s\n", buf);
 
