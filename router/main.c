@@ -153,6 +153,7 @@ int main() {
             if ((!strncmp(buf, doc[i].id, len - 1)) && (buf[len] == '\t')) {
                 buf[len] = 0;
                 asprintf(&namestr, "\"%s\"", buf);
+                buf[len] = '\t';
                 doc[i].add_field(&doc[i], "name", namestr);
 
                 doc[i].add_field(&doc[i], "value", buf + len + 1);
