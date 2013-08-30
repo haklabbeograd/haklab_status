@@ -1,5 +1,5 @@
-# Define CouchDB documents here.
-# Sections represent database location. Documents are defined per section.
+# Define CouchDB document names here.
+# Sections represent database location. Document names are defined per section.
 # If you need to post data to multiple databases, just define them in sections
 # you need them in.
 #
@@ -7,7 +7,7 @@
 
 ; Example:
 ;
-; [http://localhost:5984/haklab_status] # Database
+; [http://username:password@localhost:5984/haklab_status] # Database
 ; Temperature
 ; Humidity
 ;
