@@ -27,6 +27,8 @@ int main() {
     couchdb_doc *doc = 0;
     int docc = 0;
 
+    setlinebuf(stdout);
+
     f = fopen("/etc/haklab-status/main.conf", "r");
     if (!f) {
         f = fopen("main.conf", "r");
