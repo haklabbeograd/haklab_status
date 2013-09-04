@@ -6,7 +6,7 @@
 
 #include "couchdb.h"
 
-couchdb_doc couchdb_document_init(char *db, char *id) {
+couchdb_doc couchdb_document_init(const char *db, const char *id) {
     couchdb_doc doc;
     doc.db = strdup(db);
     doc.id = strdup(id);
@@ -22,12 +22,12 @@ couchdb_doc couchdb_document_init(char *db, char *id) {
     return doc;
 }
 
-void couchdb_document_add_field(couchdb_doc *doc, char *key, char *value) {
+void couchdb_document_add_field(couchdb_doc *doc, const char *key, const char *value) {
     couchdb_field *field;
 
     field = malloc(sizeof(couchdb_field));
-    field->key = key;
-    field->value = value;
+    field->key = strdup(key);
+    field->value = strdup(value);
     field->next = 0;
 
     if (doc->last_field)
@@ -116,6 +116,8 @@ char *couchdb_document_post_revision(couchdb_doc *doc) {
         while (field) {
             asprintf(&fields, "%s,\"%s\":%s", f, field->key, field->value);
             free(f);
+            free(field->key);
+            free(field->value);
             f = fields;
             doc->last_field = field;
             field = field->next;
