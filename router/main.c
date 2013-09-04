@@ -143,7 +143,7 @@ int main() {
 
     printf("Listening...\n");
 
-    char *timestr, *namestr;
+    char timestr[11], *namestr;
     int i;
     while (1) {
         count = read(fd, buf, 255);
@@ -158,15 +158,14 @@ int main() {
                 asprintf(&namestr, "\"%s\"", buf);
                 buf[len] = '\t';
                 doc[i].add_field(&doc[i], "name", namestr);
+                free(namestr);
 
                 doc[i].add_field(&doc[i], "value", buf + len + 1);
 
-                asprintf(&timestr, "%u", (unsigned int)time(0));
+                snprintf(timestr, 11, "%d", (int)time(0));
                 doc[i].add_field(&doc[i], "time", timestr);
-                doc[i].post_revision(&doc[i]);
 
-                free(namestr);
-                free(timestr);
+                doc[i].post_revision(&doc[i]);
             }
         }
     }
