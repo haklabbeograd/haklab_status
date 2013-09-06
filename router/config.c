@@ -8,11 +8,11 @@
 #include "config.h"
 
 
-Main_conf main_conf_parse() {
-    Main_conf conf;
-    conf.BAUDRATE = B57600;
+main_conf main_conf_parse() {
+    main_conf conf;
+    conf.baudrate = B57600;
 
-    asprintf(&conf.SERIAL_PORT, "/dev/ttyACM0");
+    asprintf(&conf.serial_port, "/dev/ttyACM0");
 
     FILE *f = fopen("/etc/haklab-status/main.conf", "r");
     if (!f) {
@@ -50,20 +50,20 @@ Main_conf main_conf_parse() {
                 exit(1);
             }
             if (!strcmp("port", s)) {
-                free(conf.SERIAL_PORT);
-                asprintf(&conf.SERIAL_PORT, "%s", e);
+                free(conf.serial_port);
+                asprintf(&conf.serial_port, "%s", e);
             }
             if (!strcmp("baudrate", s)) {
-                if (!strcmp("300", e)) conf.BAUDRATE = B300;
-                if (!strcmp("600", e)) conf.BAUDRATE = B600;
-                if (!strcmp("1200", e)) conf.BAUDRATE = B1200;
-                if (!strcmp("2400", e)) conf.BAUDRATE = B2400;
-                if (!strcmp("4800", e)) conf.BAUDRATE = B4800;
-                if (!strcmp("9600", e)) conf.BAUDRATE = B9600;
-                if (!strcmp("19200", e)) conf.BAUDRATE = B19200;
-                if (!strcmp("38400", e)) conf.BAUDRATE = B38400;
-                if (!strcmp("57600", e)) conf.BAUDRATE = B57600;
-                if (!strcmp("115200", e)) conf.BAUDRATE = B115200;
+                if (!strcmp("300", e)) conf.baudrate = B300;
+                if (!strcmp("600", e)) conf.baudrate = B600;
+                if (!strcmp("1200", e)) conf.baudrate = B1200;
+                if (!strcmp("2400", e)) conf.baudrate = B2400;
+                if (!strcmp("4800", e)) conf.baudrate = B4800;
+                if (!strcmp("9600", e)) conf.baudrate = B9600;
+                if (!strcmp("19200", e)) conf.baudrate = B19200;
+                if (!strcmp("38400", e)) conf.baudrate = B38400;
+                if (!strcmp("57600", e)) conf.baudrate = B57600;
+                if (!strcmp("115200", e)) conf.baudrate = B115200;
             }
         }
     }
@@ -71,12 +71,12 @@ Main_conf main_conf_parse() {
     return conf;
 }
 
-void main_conf_clean(Main_conf conf) {
-    free(conf.SERIAL_PORT);
+void main_conf_clean(main_conf conf) {
+    free(conf.serial_port);
 }
 
-CouchDB_conf couchdb_conf_parse() {
-    CouchDB_conf conf;
+couchdb_conf couchdb_conf_parse() {
+    couchdb_conf conf;
     conf.doc = 0;
     conf.docc = 0;
 
@@ -130,7 +130,7 @@ CouchDB_conf couchdb_conf_parse() {
     return conf;
 }
 
-void couchdb_conf_clean(CouchDB_conf conf) {
+void couchdb_conf_clean(couchdb_conf conf) {
     int i = -1;
     while (++i < conf.docc) conf.doc[i].clean(&conf.doc[i]);
     free(conf.doc);

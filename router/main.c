@@ -15,18 +15,18 @@ int main() {
 
     setlinebuf(stdout);
 
-    Main_conf main_conf = main_conf_parse();
-    CouchDB_conf couchdb_conf = couchdb_conf_parse();
+    main_conf mconf = main_conf_parse();
+    couchdb_conf cconf = couchdb_conf_parse();
 
-    fd = open(main_conf.SERIAL_PORT, O_RDWR | O_NOCTTY);
+    fd = open(mconf.serial_port, O_RDWR | O_NOCTTY);
     if (fd < 0) {
-        perror(main_conf.SERIAL_PORT);
+        perror(mconf.serial_port);
         exit(-1);
     }
 
     bzero(&tos, sizeof(tos));
 
-    tos.c_cflag = main_conf.BAUDRATE | CRTSCTS | CS8 | CLOCAL | CREAD;
+    tos.c_cflag = mconf.baudrate | CRTSCTS | CS8 | CLOCAL | CREAD;
     tos.c_iflag = IGNPAR | IGNCR;
     tos.c_oflag = 0;
     tos.c_lflag = ICANON;
@@ -46,27 +46,27 @@ int main() {
         printf("%s\n", buf);
 
         int i = -1;
-        while (++i < couchdb_conf.docc) {
-            len = strlen(couchdb_conf.doc[i].id);
-            if (!strncmp(buf, couchdb_conf.doc[i].id, len - 1) && buf[len] == '\t') {
+        while (++i < cconf.docc) {
+            len = strlen(cconf.doc[i].id);
+            if (!strncmp(buf, cconf.doc[i].id, len - 1) && buf[len] == '\t') {
                 buf[len] = 0;
                 asprintf(&namestr, "\"%s\"", buf);
                 buf[len] = '\t';
-                couchdb_conf.doc[i].add_field(&couchdb_conf.doc[i], "name", namestr);
+                cconf.doc[i].add_field(&cconf.doc[i], "name", namestr);
                 free(namestr);
 
-                couchdb_conf.doc[i].add_field(&couchdb_conf.doc[i], "value", buf + len + 1);
+                cconf.doc[i].add_field(&cconf.doc[i], "value", buf + len + 1);
 
                 snprintf(timestr, 11, "%d", (int)time(0));
-                couchdb_conf.doc[i].add_field(&couchdb_conf.doc[i], "time", timestr);
+                cconf.doc[i].add_field(&cconf.doc[i], "time", timestr);
 
-                couchdb_conf.doc[i].post_revision(&couchdb_conf.doc[i]);
+                cconf.doc[i].post_revision(&cconf.doc[i]);
             }
         }
     }
 
-    main_conf_clean(main_conf);
-    couchdb_conf_clean(couchdb_conf);
+    main_conf_clean(mconf);
+    couchdb_conf_clean(cconf);
 
     return 0;
 }

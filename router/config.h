@@ -3,16 +3,16 @@
 typedef struct {
     couchdb_doc *doc;
     int docc;
-} CouchDB_conf;
+} couchdb_conf;
 
 typedef struct {
-    unsigned int BAUDRATE;
-    char *SERIAL_PORT;
-} Main_conf;
+    unsigned int baudrate;
+    char *serial_port;
+} main_conf;
 
-Main_conf main_conf_parse();
-void main_conf_clean(Main_conf conf);
+main_conf main_conf_parse();
+void main_conf_clean(main_conf conf);
 
-CouchDB_conf couchdb_conf_parse();
-void couchdb_conf_clean(CouchDB_conf conf);
+couchdb_conf couchdb_conf_parse();
+void couchdb_conf_clean(couchdb_conf conf);
 
