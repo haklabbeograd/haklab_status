@@ -5,6 +5,11 @@
 
 #include "couchdb.h"
 
+void couchdb_document_add_field(couchdb_doc *doc, const char *key, const char *value);
+void couchdb_document_clean(couchdb_doc *doc);
+char *couchdb_document_get_revision(couchdb_doc *doc);
+char *couchdb_document_post_revision(couchdb_doc *doc);
+
 couchdb_doc couchdb_document_init(const char *db, const char *id) {
     couchdb_doc doc;
     doc.db = strdup(db);

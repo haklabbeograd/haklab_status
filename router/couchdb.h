@@ -17,7 +17,3 @@ typedef struct CouchDB_Document {
 } couchdb_doc;
 
 couchdb_doc couchdb_document_init(const char * db, const char * id);
-void couchdb_document_add_field(couchdb_doc *doc, const char *key, const char *value);
-void couchdb_document_clean(couchdb_doc *doc);
-char *couchdb_document_get_revision(couchdb_doc *doc);
-char *couchdb_document_post_revision(couchdb_doc *doc);
