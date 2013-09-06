@@ -6,7 +6,6 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <time.h>
-#include <ctype.h>
 
 #include "config.h"
 
