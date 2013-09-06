@@ -13,13 +13,8 @@ Main_conf main_conf_parse() {
     conf.BAUDRATE = B57600;
 
     asprintf(&conf.SERIAL_PORT, "/dev/ttyACM0");
-    FILE *f;
-    char *s, *e;
-    int line, len;
 
-    char buf[255];
-
-    f = fopen("/etc/haklab-status/main.conf", "r");
+    FILE *f = fopen("/etc/haklab-status/main.conf", "r");
     if (!f) {
         f = fopen("main.conf", "r");
         if (!f) {
@@ -28,10 +23,12 @@ Main_conf main_conf_parse() {
         }
     }
 
-    line = 0;
+    int line = 0;
+    char buf[255];
     while (fgets(buf, sizeof(buf), f)) {
         line++;
-        s = buf;
+
+        char *e, *s = buf;
         s[strlen(s) - 1] = 0;
         if ((e = index(s, '#'))) *e = 0;
         if ((e = index(s, ';'))) *e = 0;
@@ -39,7 +36,7 @@ Main_conf main_conf_parse() {
         while (isspace(*s)) s++;
         if (!*s) continue;
 
-        len = strlen(s) - 1;
+        int len = strlen(s) - 1;
         while (isspace(s[len])) s[len--] = 0;
         if (!*s) continue;
 
@@ -83,14 +80,9 @@ CouchDB_conf couchdb_conf_parse() {
     conf.doc = 0;
     conf.docc = 0;
 
-    FILE *f;
-    char *s, *e;
-    int line, len;
 
-    char buf[255];
 
-    char *database = 0;
-    f = fopen("/etc/haklab-status/couchdb.conf", "r");
+    FILE *f = fopen("/etc/haklab-status/couchdb.conf", "r");
     if (!f) {
         f = fopen("couchdb.conf", "r");
         if (!f) {
@@ -99,10 +91,13 @@ CouchDB_conf couchdb_conf_parse() {
         }
     }
 
-    line = 0;
+    char *database = 0;
+    int line = 0;
+    char buf[255];
     while (fgets(buf, sizeof(buf), f)) {
         line++;
-        s = buf;
+
+        char *e, *s = buf;
         s[strlen(s) - 1] = 0;
         if ((e = index(s, '#'))) *e = 0;
         if ((e = index(s, ';'))) *e = 0;
@@ -110,7 +105,7 @@ CouchDB_conf couchdb_conf_parse() {
         while (isspace(*s)) s++;
         if (!*s) continue;
 
-        len = strlen(s) - 1;
+        int len = strlen(s) - 1;
         while (isspace(s[len])) s[len--] = 0;
         if (!*s) continue;
 

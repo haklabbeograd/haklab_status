@@ -48,7 +48,7 @@ int main() {
         int i = -1;
         while (++i < couchdb_conf.docc) {
             len = strlen(couchdb_conf.doc[i].id);
-            if ((!strncmp(buf, couchdb_conf.doc[i].id, len - 1)) && (buf[len] == '\t')) {
+            if (!strncmp(buf, couchdb_conf.doc[i].id, len - 1) && buf[len] == '\t') {
                 buf[len] = 0;
                 asprintf(&namestr, "\"%s\"", buf);
                 buf[len] = '\t';
