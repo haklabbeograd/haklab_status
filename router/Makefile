@@ -4,6 +4,8 @@ CFLAGS=-g -Wall -I.
 LIBS=$$(curl-config --libs)
 OBJS=main.o couchdb.o config.o
 
+ETCDIR=$(DESTDIR)/etc/haklab-status/
+
 make: haklab-status
 
 all: haklab-status couchdb-init
@@ -23,15 +25,15 @@ couchdb-init:
 	./couchdb-init.sh
 
 install: haklab-status
-	mkdir -p /etc/haklab-status
-	cp haklab-status /usr/bin/
-	cp *.conf.example /etc/haklab-status/
+	mkdir -p $(DESTDIR)/usr/bin $(ETCDIR)
+	install haklab-status $(DESTDIR)/usr/bin/
+	cp *.conf.example $(ETCDIR)
 
-	cp -n main.conf.example /etc/haklab-status/main.conf
-	cp -n couchdb.conf.example /etc/haklab-status/couchdb.conf
+	test -f $(ETCDIR)main.conf || cp main.conf.example $(ETCDIR)main.conf
+	test -f $(ETCDIR)couchdb.conf || cp couchdb.conf.example $(ETCDIR)couchdb.conf
 
 uninstall:
-	rm -rf /usr/bin/haklab-status /etc/haklab-status/
+	rm -rf $(DESTDIR)/usr/bin/haklab-status $(ETCDIR)
 
 openwrt:
 	test $${OPENWRT_DIR}
