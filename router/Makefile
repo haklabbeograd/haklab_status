@@ -4,13 +4,18 @@ CFLAGS=-g -Wall -I.
 LIBS=$$(curl-config --libs)
 OBJS=main.o couchdb.o config.o
 
+GIT_VERSION=$$(git log --pretty=%h -n1 . 2>/dev/null || echo)
 ETCDIR=$(DESTDIR)/etc/haklab-status/
 
 make: haklab-status
 
 all: haklab-status couchdb-init
 
-.PHONY: make all haklab-status run install uninstall openwrt clean-all clean couchdb-clean
+.PHONY: make all haklab-status version run install uninstall openwrt clean-all clean couchdb-clean
+
+main.o: main.c version.h config.h version
+config.o: couchdb.h
+version.h: version
 
 %.o: %.c %.h
 	$(CC) $(CFLAGS) -c $<
@@ -23,6 +28,10 @@ run: haklab-status
 
 couchdb-init:
 	./couchdb-init.sh
+
+version:
+	@echo "#define VERSION \"$$(cat VERSION)\"" > version.h
+	@echo "#define GIT_VERSION \"$(GIT_VERSION)\"" >> version.h
 
 install: haklab-status
 	mkdir -p $(DESTDIR)/usr/bin $(ETCDIR)
@@ -40,14 +49,17 @@ openwrt:
 	rm -rf $(OPENWRT_DIR)/package/haklab-status
 	mkdir -p $(OPENWRT_DIR)/package/haklab-status/src
 	cp openwrt/Makefile $(OPENWRT_DIR)/package/haklab-status
-	cp *.c *.h Makefile $(OPENWRT_DIR)/package/haklab-status/src
+	cp *.c *.h Makefile VERSION $(OPENWRT_DIR)/package/haklab-status/src
+	sed -i s/PKG_VERSION_UNSET/PKG_VERSION:=$$(cat VERSION)/ \
+	    $(OPENWRT_DIR)/package/haklab-status/Makefile
+	echo $(GIT_VERSION) > $(OPENWRT_DIR)/package/haklab-status/src/GIT_VERSION
 	$(OPENWRT_DIR)/scripts/feeds update packages
 	$(OPENWRT_DIR)/scripts/feeds install libcurl
 
 clean-all: clean couchdb-clean
 
 clean:
-	rm -f haklab-status
+	rm -f haklab-status version.h
 	rm -f *.o
 
 couchdb-clean:

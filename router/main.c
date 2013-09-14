@@ -7,9 +7,18 @@
 #include <termios.h>
 #include <time.h>
 
+#include "version.h"
 #include "config.h"
 
-int main() {
+int main(int argc, char *argv[]) {
+    int argn = 0;
+    while (++argn < argc) {
+        if (!strcmp(argv[argn], "--version")) {
+            printf("haklab-status %s %s\n", VERSION, GIT_VERSION);
+            exit(0);
+        }
+    }
+
     int fd;
     struct termios tos;
 

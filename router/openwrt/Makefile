@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=haklab-status
-PKG_VERSION:=0.1
+PKG_VERSION_UNSET
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 PKG_INSTALL_DIR:=$(PKG_BUILD_DIR)/ipkg-install
@@ -27,7 +27,8 @@ define Build/Compile
 	$(MAKE) -C $(PKG_BUILD_DIR) \
 	CC=$(TARGET_CC) \
 	LIBS=-lcurl \
-	CFLAGS="-I. -O2"
+	CFLAGS="-I. -O2" \
+	GIT_VERSION=$$$$(cat $(PKG_BUILD_DIR)/GIT_VERSION)
 endef
 
 define Package/haklab-status/install
