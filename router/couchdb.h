@@ -16,4 +16,21 @@ typedef struct CouchDB_Document {
     void (*clean)(struct CouchDB_Document *doc);
 } couchdb_doc;
 
-couchdb_doc couchdb_document_init(const char * db, const char * id);
+couchdb_doc couchdb_document_init(const char *db, const char *id);
+
+typedef struct CouchDB_Changes {
+    char *db;
+    size_t (*parser)(char *ptr, size_t size, size_t nmemb, void *arg);
+    void *arg;
+    char *id;
+    int last;
+
+    void (*get_last)(struct CouchDB_Changes *chan);
+    void (*parse)(struct CouchDB_Changes *chan);
+    void (*clean)(struct CouchDB_Changes *chan);
+} couchdb_changes;
+
+couchdb_changes couchdb_changes_init(
+    const char *db,
+    size_t (*parser)(char *ptr, size_t size, size_t nmemb, void *arg),
+    void *arg);

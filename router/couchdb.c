@@ -10,6 +10,10 @@ void couchdb_document_clean(couchdb_doc *doc);
 char *couchdb_document_get_revision(couchdb_doc *doc);
 char *couchdb_document_post_revision(couchdb_doc *doc);
 
+void couchdb_changes_get_last(couchdb_changes *chan);
+void couchdb_changes_parse(couchdb_changes *chan);
+void couchdb_changes_clean(couchdb_changes *chan);
+
 couchdb_doc couchdb_document_init(const char *db, const char *id) {
     couchdb_doc doc;
     doc.db = strdup(db);
@@ -153,4 +157,68 @@ char *couchdb_document_post_revision(couchdb_doc *doc) {
     curl_slist_free_all(chunk);
     curl_easy_cleanup(curl);
     return rev;
+}
+
+couchdb_changes couchdb_changes_init(
+    const char *db,
+    size_t (*parser)(char *ptr, size_t size, size_t nmemb, void *arg),
+    void *arg) {
+    couchdb_changes chan;
+    char append_char = index(db, '?') ? '&' : '?';
+    asprintf(&chan.db, "%s%c", db, append_char);
+    chan.parser = parser;
+    chan.arg = arg;
+    chan.last = -1;
+    chan.get_last = couchdb_changes_get_last;
+    chan.parse = couchdb_changes_parse;
+    chan.clean = couchdb_changes_clean;
+
+    curl_global_init(CURL_GLOBAL_ALL);
+    return chan;
+}
+
+void couchdb_changes_get_last(couchdb_changes *chan) {
+    size_t seq_writer(char *ptr, size_t size, size_t nmemb, int *seq) {
+        ptr = strstr(ptr, "\"last_seq\":");
+        if (ptr) sscanf(ptr + 11, "%d", seq);
+        return size * nmemb;
+    }
+    CURL *curl;
+    CURLcode res;
+    curl = curl_easy_init();
+    char *url;
+    asprintf(&url, "%slimit=1&descending=true", chan->db);
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, seq_writer);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &chan->last);
+
+    res = curl_easy_perform(curl);
+    if(res != CURLE_OK)
+        fprintf(stderr, "Curl failed: %s\n",
+                curl_easy_strerror(res));
+    curl_easy_cleanup(curl);
+    free(url);
+}
+
+void couchdb_changes_parse(couchdb_changes *chan) {
+    CURL *curl;
+    CURLcode res;
+    curl = curl_easy_init();
+    char *url;
+    asprintf(&url, "%sfeed=continuous&heartbeat=30000&since=%d",
+             chan->db, chan->last);
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, chan->parser);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &chan->arg);
+
+    res = curl_easy_perform(curl);
+    if(res != CURLE_OK)
+        fprintf(stderr, "Curl failed: %s\n",
+                curl_easy_strerror(res));
+    curl_easy_cleanup(curl);
+    free(url);
+}
+
+void couchdb_changes_clean(couchdb_changes *chan) {
+    free(chan->db);
 }
