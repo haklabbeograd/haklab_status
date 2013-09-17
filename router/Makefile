@@ -2,7 +2,7 @@
 CC=gcc
 CFLAGS=-g -Wall -I.
 LIBS=$$(curl-config --libs)
-OBJS=main.o couchdb.o config.o
+OBJS=main.o config.o controller.o couchdb.o
 
 GIT_VERSION=$$(git log --pretty=%h -n1 . 2>/dev/null || echo)
 ETCDIR=$(DESTDIR)/etc/haklab-status/
@@ -13,7 +13,7 @@ all: haklab-status couchdb-init
 
 .PHONY: make all haklab-status version run install uninstall openwrt clean-all clean couchdb-clean
 
-main.o: main.c version.h config.h version
+main.o: main.c version.h config.h controller.h version
 config.o: couchdb.h
 controller.o: couchdb.h
 version.h: version

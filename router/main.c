@@ -8,6 +8,7 @@
 #include <time.h>
 
 #include "version.h"
+#include "controller.h"
 #include "config.h"
 
 int main(int argc, char *argv[]) {
@@ -43,8 +44,10 @@ int main(int argc, char *argv[]) {
     tcflush(fd, TCIFLUSH);
     tcsetattr(fd, TCSANOW, &tos);
 
-    printf("Listening...\n");
+    if (mconf.controller[0])
+        run_controller_thread(mconf.controller);
 
+    puts("Listening...");
     while (1) {
         char buf[255];
         char timestr[11], *namestr;

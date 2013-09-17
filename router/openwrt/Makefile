@@ -13,7 +13,7 @@ define Package/haklab-status
 	CATEGORY:=misc
 	TITLE:=Haklab status
 	URL:=https://github.com/haklabbeograd/haklab_status
-	DEPENDS:=+libcurl
+	DEPENDS:=+libcurl +libpthread
 endef 
 
 define Build/Prepare
@@ -26,7 +26,7 @@ define Build/Compile
 	mkdir -p $(PKG_INSTALL_DIR)/usr/bin
 	$(MAKE) -C $(PKG_BUILD_DIR) \
 	CC=$(TARGET_CC) \
-	LIBS=-lcurl \
+	LIBS="-lcurl -lpthread" \
 	CFLAGS="-I. -O2" \
 	GIT_VERSION=$$$$(cat $(PKG_BUILD_DIR)/GIT_VERSION)
 endef
