@@ -15,6 +15,7 @@ all: haklab-status couchdb-init
 
 main.o: main.c version.h config.h version
 config.o: couchdb.h
+controller.o: couchdb.h
 version.h: version
 
 %.o: %.c %.h
