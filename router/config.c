@@ -13,6 +13,8 @@ main_conf main_conf_parse() {
     conf.baudrate = B57600;
 
     asprintf(&conf.serial_port, "/dev/ttyACM0");
+    conf.controller = malloc(sizeof(char));
+    conf.controller[0] = 0;
 
     FILE *f = fopen("/etc/haklab-status/main.conf", "r");
     if (!f) {
@@ -65,6 +67,10 @@ main_conf main_conf_parse() {
                 if (!strcmp("57600", e)) conf.baudrate = B57600;
                 if (!strcmp("115200", e)) conf.baudrate = B115200;
             }
+            if (!strcmp("controller", s)) {
+                free(conf.controller);
+                asprintf(&conf.controller, "%s", e);
+            }
         }
     }
     fclose(f);
@@ -73,14 +79,13 @@ main_conf main_conf_parse() {
 
 void main_conf_clean(main_conf conf) {
     free(conf.serial_port);
+    free(conf.controller);
 }
 
 couchdb_conf couchdb_conf_parse() {
     couchdb_conf conf;
     conf.doc = 0;
     conf.docc = 0;
-
-
 
     FILE *f = fopen("/etc/haklab-status/couchdb.conf", "r");
     if (!f) {

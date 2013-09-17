@@ -8,6 +8,7 @@ typedef struct {
 typedef struct {
     unsigned int baudrate;
     char *serial_port;
+    char *controller;
 } main_conf;
 
 main_conf main_conf_parse();

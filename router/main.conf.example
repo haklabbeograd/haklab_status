@@ -8,3 +8,4 @@
 # Default value for port is /dev/ttyACM0 and for baudrate 57600.
 ;port = /dev/ttyACM0
 ;baudrate = 57600
+;controller = http://localhost:5984/haklab_status/_changes
