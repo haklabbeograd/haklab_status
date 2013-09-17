@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
     tcsetattr(fd, TCSANOW, &tos);
 
     if (mconf.controller[0])
-        run_controller_thread(mconf.controller);
+        run_controller_thread(mconf.controller, &fd);
 
     puts("Listening...");
     while (1) {

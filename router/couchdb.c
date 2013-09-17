@@ -134,8 +134,7 @@ void couchdb_changes_get_last(couchdb_changes *chan) {
 
     res = curl_easy_perform(curl);
     if(res != CURLE_OK)
-        fprintf(stderr, "Curl failed: %s\n",
-                curl_easy_strerror(res));
+        fprintf(stderr, "Curl failed: %s\n", curl_easy_strerror(res));
     curl_easy_cleanup(curl);
     free(url);
 }
@@ -149,12 +148,11 @@ void couchdb_changes_parse(couchdb_changes *chan) {
              chan->db, chan->last);
     curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, chan->parser);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &chan->arg);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, chan->arg);
 
     res = curl_easy_perform(curl);
     if(res != CURLE_OK)
-        fprintf(stderr, "Curl failed: %s\n",
-                curl_easy_strerror(res));
+        fprintf(stderr, "Curl failed: %s\n", curl_easy_strerror(res));
     curl_easy_cleanup(curl);
     free(url);
 }
