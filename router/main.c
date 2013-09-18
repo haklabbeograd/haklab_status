@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
                 snprintf(timestr, 11, "%d", (int)time(0));
                 cconf.doc[i].add_field(&cconf.doc[i], "time", timestr);
 
-                cconf.doc[i].post_revision(&cconf.doc[i]);
+                cconf.doc[i].post(&cconf.doc[i]);
             }
         }
     }

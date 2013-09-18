@@ -7,23 +7,27 @@
 
 void couchdb_document_add_field(couchdb_doc *doc, const char *key, const char *value);
 void couchdb_document_clean(couchdb_doc *doc);
-char *couchdb_document_get_revision(couchdb_doc *doc);
-char *couchdb_document_post_revision(couchdb_doc *doc);
+void couchdb_document_post(couchdb_doc *doc);
 
 void couchdb_changes_get_last(couchdb_changes *chan);
 void couchdb_changes_parse(couchdb_changes *chan);
 void couchdb_changes_clean(couchdb_changes *chan);
 
+size_t write_errors(char *p, size_t s, size_t n, void *u) {
+    if (!strncmp(p, "{\"error\":", 9))
+        fprintf(stderr, "%s", p);
+    return s * n;
+}
+
 couchdb_doc couchdb_document_init(const char *db, const char *id) {
     couchdb_doc doc;
     doc.db = strdup(db);
     doc.id = strdup(id);
-    doc.rev = 0;
     doc.first_field = 0;
     doc.last_field = 0;
 
     doc.add_field = couchdb_document_add_field;
-    doc.post_revision = couchdb_document_post_revision;
+    doc.post = couchdb_document_post;
     doc.clean = couchdb_document_clean;
 
     curl_global_init(CURL_GLOBAL_ALL);
@@ -45,80 +49,21 @@ void couchdb_document_add_field(couchdb_doc *doc, const char *key, const char *v
     doc->last_field = field;
 }
 
-void couchdb_document_clean(couchdb_doc *doc) {
-    if (doc->db) free(doc->db);
-    if (doc->id) free(doc->id);
-    if (doc->rev) free(doc->rev);
-}
-
-struct revdata {
-    const char *revstr;
-    char **rev;
-};
-
-size_t write_data(char *ptr, size_t size, size_t nmemb,
-                  struct revdata *userdata) {
-    size_t e() {
-        fprintf(stderr, "%s\n", ptr);
-        return size*nmemb;
-    }
-    char *needle;
-    asprintf(&needle, "\"%s\":\"", userdata->revstr);
-    char *start, *end;
-    start = strstr(ptr, needle);
-    if (!start) return e();
-    start += strlen(needle);
-    free(needle);
-    end = strstr(start, "\"");
-    if (!end) return e();
-    *end = 0;
-    asprintf(userdata->rev, "%s", start);
-    return size*nmemb;
-}
-
-char *couchdb_document_get_revision(couchdb_doc *doc) {
-    char *rev = 0;
-    struct revdata rvd = {"_rev", &rev};
-    CURL *curl;
-    CURLcode res;
-
-    curl = curl_easy_init();
-    if (!curl) return 0;
-
-    char *url;
-    asprintf(&url, "%s/%s", doc->db, doc->id);
-    curl_easy_setopt(curl, CURLOPT_URL, url);
-
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &rvd);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
-    res = curl_easy_perform(curl);
-    if (res != CURLE_OK)
-        fprintf(stderr, "Curl failed: %s\n",
-                curl_easy_strerror(res));
-    free(url);
-    curl_easy_cleanup(curl);
-    doc->rev = rev;
-    return rev;
-}
-
-char *couchdb_document_post_revision(couchdb_doc *doc) {
-    char *rev = 0;
-    struct revdata rvd = {"rev", &rev};
-
+void couchdb_document_post(couchdb_doc *doc) {
     CURL *curl;
     CURLcode res;
     curl = curl_easy_init();
-    if (!curl) return rev;
     curl_easy_setopt(curl, CURLOPT_URL, doc->db);
 
     struct curl_slist *chunk;
     chunk = curl_slist_append(0, "Content-Type: application/json");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_errors);
 
     char *fields, *f, *json;
     couchdb_field *field;
-    f = fields = malloc(sizeof(char));
-    f[0] = 0;
+    f = fields = malloc(sizeof(char) * 2);
+    f[0] = f[1] = 0;
     if (doc->first_field) {
         field = doc->first_field;
         while (field) {
@@ -141,22 +86,17 @@ char *couchdb_document_post_revision(couchdb_doc *doc) {
 
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json);
 
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &rvd);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
     res = curl_easy_perform(curl);
     if (res != CURLE_OK)
-        fprintf(stderr, "Curl failed: %s\n",
-                curl_easy_strerror(res));
-    else {
-        if (rev) {
-            free(doc->rev);
-            doc->rev = rev;
-        }
-    }
+        fprintf(stderr, "Curl failed: %s\n", curl_easy_strerror(res));
     free(json);
     curl_slist_free_all(chunk);
     curl_easy_cleanup(curl);
-    return rev;
+}
+
+void couchdb_document_clean(couchdb_doc *doc) {
+    free(doc->db);
+    free(doc->id);
 }
 
 couchdb_changes couchdb_changes_init(
