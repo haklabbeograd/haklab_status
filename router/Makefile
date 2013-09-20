@@ -7,16 +7,22 @@ OBJS=main.o config.o controller.o couchdb.o
 GIT_VERSION=$$(git log --pretty=%h -n1 . 2>/dev/null || echo)
 ETCDIR=$(DESTDIR)/etc/haklab-status/
 
-make: haklab-status
+make: version-clean
+	$(MAKE) --no-print-directory haklab-status
 
-all: haklab-status couchdb-init
+all: make
+	$(MAKE) --no-print-directory couchdb-init
 
-.PHONY: make all haklab-status version run install uninstall openwrt clean-all clean couchdb-clean
+.PHONY: make all run install uninstall openwrt clean-all clean couchdb-clean version-clean
 
-main.o: main.c version.h config.h controller.h version
+.SILENT: make all version.h openwrt clean couchdb-clean version-clean
+
+main.o: main.c version.h config.h controller.h
 config.o: couchdb.h
 controller.o: couchdb.h
-version.h: version
+version.h:
+	echo "#define VERSION \"$$(cat VERSION)\"" > version.h
+	echo "#define GIT_VERSION \"$(GIT_VERSION)\"" >> version.h
 
 %.o: %.c %.h
 	$(CC) $(CFLAGS) -c $<
@@ -30,10 +36,6 @@ run: haklab-status
 couchdb-init:
 	./couchdb-init.sh
 
-version:
-	@echo "#define VERSION \"$$(cat VERSION)\"" > version.h
-	@echo "#define GIT_VERSION \"$(GIT_VERSION)\"" >> version.h
-
 install: haklab-status
 	mkdir -p $(DESTDIR)/usr/bin $(ETCDIR)
 	install haklab-status $(DESTDIR)/usr/bin/
@@ -46,7 +48,8 @@ uninstall:
 	rm -rf $(DESTDIR)/usr/bin/haklab-status $(ETCDIR)
 
 openwrt:
-	test $${OPENWRT_DIR}
+	test $${OPENWRT_DIR} || (echo "OpenWRT directory not specified. Run:" && \
+	    echo "make openwrt OPENWRT_DIR=/path/to/openwrt/dir" && false)
 	rm -rf $(OPENWRT_DIR)/package/haklab-status
 	mkdir -p $(OPENWRT_DIR)/package/haklab-status/src
 	cp openwrt/Makefile $(OPENWRT_DIR)/package/haklab-status
@@ -54,14 +57,15 @@ openwrt:
 	sed -i s/PKG_VERSION_UNSET/PKG_VERSION:=$$(cat VERSION)/ \
 	    $(OPENWRT_DIR)/package/haklab-status/Makefile
 	echo $(GIT_VERSION) > $(OPENWRT_DIR)/package/haklab-status/src/GIT_VERSION
-	$(OPENWRT_DIR)/scripts/feeds update packages
-	$(OPENWRT_DIR)/scripts/feeds install libcurl
 
-clean-all: clean couchdb-clean
+version-clean:
+	rm -f version.h
 
-clean:
-	rm -f haklab-status version.h
+clean: version-clean
+	rm -f haklab-status
 	rm -f *.o
 
 couchdb-clean:
 	rm -f couchdb-init couchdb-init.error
+
+clean-all: clean couchdb-clean
