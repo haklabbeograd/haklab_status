@@ -1,6 +1,6 @@
 #!/usr/bin/make
 CC=gcc
-CFLAGS=-g -Wall -I.
+CFLAGS=-g -Wall -Wextra -std=gnu99 -I.
 LIBS=$$(curl-config --libs)
 OBJS=main.o config.o controller.o couchdb.o
 

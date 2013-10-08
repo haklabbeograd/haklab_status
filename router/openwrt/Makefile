@@ -27,7 +27,7 @@ define Build/Compile
 	$(MAKE) -C $(PKG_BUILD_DIR) \
 	CC=$(TARGET_CC) \
 	LIBS="-lcurl -lpthread" \
-	CFLAGS="-I. -O2" \
+	CFLAGS="-I. -std=c99 -O2" \
 	GIT_VERSION=$$$$(cat $(PKG_BUILD_DIR)/GIT_VERSION)
 endef
 
