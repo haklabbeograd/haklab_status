@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
         exit(-1);
     }
 
-    bzero(&tos, sizeof(tos));
+    memset(&tos, 0, sizeof(tos));
 
     tos.c_cflag = mconf.baudrate | CRTSCTS | CS8 | CLOCAL | CREAD;
     tos.c_iflag = IGNPAR | IGNCR;
