@@ -39,24 +39,52 @@ void loop()
     //Serial.println("\nNumber of Boards connected: ");
     //Serial.println(nBoards);
     
+    char commandBuf[255];
+    char count;
+    if(Serial.available())
+    {
+        count = Serial.readBytesUntil('\n',commandBuf,254);
+        commandBuf[count] = 0;
+        Serial.println(commandBuf);
+        if(!strncmp(commandBuf,"LAS", 3))
+        {
+            listBoardsAndSenActsToSerial();
+        }
+        if(!strncmp(commandBuf,"RAS", 3))
+        {
+            if(nBoards)
+            {    
+                //Serial.println("\nentered readout");
+                for(int i = 0; i < nBoards; i++)
+                {
+                    //readAllSwIntonBoard(&(Boards[i]));
+                    readAllSonBoard(&(Boards[i]));
+                    delay(250);
+                }
+            delay(2500);
+            }
+        }
+    }
     //Reads through all the boards and their sensors    
-    if(nBoards)
+    /*if(nBoards)
+    
     {    
         //Serial.println("\nentered readout");
         for(int i = 0; i < nBoards; i++)
         {
-            readAllSwIntonBoard(&(Boards[i]));
+            //readAllSwIntonBoard(&(Boards[i]));
+            readAllSonBoard(&(Boards[i]));
             delay(250);
         }
         delay(2500);
-    }
+    }*/
     
     //Detects new boards on the registration channel
     //If the board is new, adds it to the network
     //If the board is one that has lost connection attaches back
     if(newBoardAvailable())
     {
-        Serial.println("entered registration");
+        //Serial.println("entered registration");
         if(newBoardConnect())
         {
             if(newBoardDefine()) 

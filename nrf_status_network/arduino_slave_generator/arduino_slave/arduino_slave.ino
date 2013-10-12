@@ -18,13 +18,20 @@
 #include <SPI.h>
 #include "RF24.h"
 #include "Board.h"
+#include "DHT.h"
 
+#define DHTPIN 8     // what pin we're connected to
+
+// Uncomment whatever type you're using!
+#define DHTTYPE DHT11   // DHT 11 
 
 //
 // Hardware configuration
 //
 boolean connected = false;  
 unsigned long timerA;       //Timeout Timer
+DHT dht(DHTPIN, DHTTYPE);
+
 
 void setup(void)
 {
@@ -35,6 +42,7 @@ void setup(void)
     //
     //Enter senosr setup here
     //
+    dht.begin();
 }
 
 void loop()
@@ -58,7 +66,7 @@ void loop()
         }
         
         //Timer function disconects after 50s if no command is receved
-        if(millis()-timerA > 50000)
+        if(millis()-timerA > 10000)
             {
                 connected = false;
                 Serial.println("\nTimer Conn has gone");
@@ -96,10 +104,12 @@ boolean packAllSensor()
 }
 
 float readSensor1()
-{//enter code here to read the Humidity named sensor
+{//enter code here to read the Temp named sensor
+    dht.readTemperature();
 }
 
 float readSensor2()
-{//enter code here to read the Temperature named sensor
+{//enter code here to read the Humi named sensor
+    dht.readHumidity();
 }
 // vim:cin:ai:sts=2 sw=2 ft=cpp

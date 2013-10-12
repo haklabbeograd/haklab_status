@@ -160,18 +160,19 @@ void SensorGenerate(int index)
     if(strlen(SensorName)>MAX_SIZE_OF_NAME)SensorName[MAX_SIZE_OF_NAME] = 0;
     strncpy ( theSenActs[index].name, SensorName, MAX_SIZE_OF_NAME );
     typeSwitch(&theSenActs[index].type);
-    unsigned char tmp, error = 0;
+    char tmp, error = 0;
     do
     {
         printf("\nShould the sensor interrupt or respond to reqests?");
         printf("\n0: respond");
         printf("\n1: interrupt");
         printf("\nEnter 0-1: ");
-        scanf("%c", &tmp);
-        if((tmp != 1) && (tmp != 0)) error = 1;
-        else error = 0;
+        getchar();
+        tmp = getchar();
+        if((tmp == '1') || (tmp == '0')) error = 0;
+        else error = 1;
     }while (error);
-    theSenActs[index].reqOrInt = (REQ_OR_INT)tmp;
+    theSenActs[index].reqOrInt = (REQ_OR_INT)(tmp - 0x30);//atoi :)
 }
 
 void printReadFunctionsH(FILE *fp)

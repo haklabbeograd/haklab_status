@@ -82,6 +82,7 @@ boolean readSensorB(SenAct * theSenAct)
     {
         if(readPackage(theSenAct->lastReading, theSenAct->nData))
         {
+            Serial.print("\n");
             switch(theSenAct->type)
             {
                 case BOOL:
@@ -248,6 +249,7 @@ void unpackBoard(Board* theBoard, byte * package)
     theBoard->nSenAct = (unsigned char)package[SIZE_OF_NAME];
     //Serial.print("Number of Sensors/Actuators: ");
     //Serial.print(theBoard->nSenAct);
+    
 }
 
 /****************************************************************************/
@@ -287,7 +289,7 @@ void unpackSenAct(SenAct* theSenAct, byte * package)
     //Serial.print("Sensor number: ");
     theSenAct->nSA = (unsigned char) package[SIZE_OF_NAME + 3];
     //Serial.println(theSenAct->nSA,DEC);
-    theSensAct->reqOrInt = (REQ_OR_INT) package[SIZE_OF_NAME + 4]
+    theSenAct->reqOrInt = (REQ_OR_INT) package[SIZE_OF_NAME + 4];
 }
 
 /****************************************************************************/
@@ -481,7 +483,7 @@ boolean returnBoardToNetwork(Board *theBoard, int index)
                     delay(10);
                     if(writePackage(&k, 1)) 
                     {
-                        Serial.println("Board reconnected!");
+                        //Serial.println("Board reconnected!");
                         return true;
                     }
                     else   return false;
@@ -498,5 +500,28 @@ boolean returnBoardToNetwork(Board *theBoard, int index)
     }
     else
     {return false;
+    }
+}
+
+/****************************************************************************/
+
+void listBoardsAndSenActsToSerial(void)
+{
+     if(nBoards)
+    {    
+        for(int i = 0; i < nBoards; i++)
+        {
+            for(int j =0; j < Boards[i].nSenAct; j++)
+            {
+                Serial.print("\nRegister\t");
+                Serial.print(Boards[i].name);
+                Serial.print("\t");
+                Serial.print(i);
+                Serial.print("\t");
+                Serial.print((Boards[i].arraySenAct+j)->name);
+                Serial.print("\t");
+                Serial.println(j);
+            }
+        }
     }
 }

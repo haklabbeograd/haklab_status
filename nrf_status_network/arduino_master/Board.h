@@ -192,7 +192,7 @@ boolean readAllSonBoard(Board * theBoard);
    * @param theBoard    Which Board to read from
    * @return            True if all readings are succesfull, fail if not
    */
-boolean readAllSwIntonBoard(Board * theBoard)
+boolean readAllSwIntonBoard(Board * theBoard);
 
 /**
  * Checks the Registration channel if any boards are available on it.
@@ -242,4 +242,9 @@ boolean alreadyRegistared(Board *theBoard,int *index);
  */ 
 boolean returnBoardToNetwork(Board *theBoard, int index);
 
+/**
+ * Reads all Boardsand sensorsconnected to the serial
+ * 
+ */
+void listBoardsAndSenActsToSerial(void);
 #endif
