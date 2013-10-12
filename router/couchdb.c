@@ -13,7 +13,7 @@ void couchdb_changes_get_last(couchdb_changes *chan);
 void couchdb_changes_parse(couchdb_changes *chan);
 void couchdb_changes_clean(couchdb_changes *chan);
 
-size_t write_errors(char *p, size_t s, size_t n, void *u) {
+size_t write_errors(char *p, size_t s, size_t n) {
     if (!strncmp(p, "{\"error\":", 9))
         fprintf(stderr, "%s", p);
     return s * n;

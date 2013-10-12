@@ -32,13 +32,17 @@ main_conf main_conf_parse() {
 
         char *e, *s = buf;
         s[strlen(s) - 1] = 0;
+
+        /* Remove comments */
         if ((e = index(s, '#'))) *e = 0;
         if ((e = index(s, ';'))) *e = 0;
 
+        /* Trim spaces left */
         while (isspace(*s)) s++;
         if (!*s) continue;
 
         int len = strlen(s) - 1;
+        /* Trim spaces right */
         while (isspace(s[len])) s[len--] = 0;
         if (!*s) continue;
 
@@ -48,7 +52,7 @@ main_conf main_conf_parse() {
             while (isspace(s[len])) s[len--] = 0;
             while (isspace(*e)) e++;
             if (*s == 0) {
-                printf("Syntax error in main.conf on line %d.\n", line);
+                fprintf(stderr, "Syntax error in main.conf on line %d.\n", line);
                 exit(1);
             }
             if (!strcmp("port", s)) {
@@ -57,15 +61,15 @@ main_conf main_conf_parse() {
             }
             if (!strcmp("baudrate", s)) {
                 if (!strcmp("300", e)) conf.baudrate = B300;
-                if (!strcmp("600", e)) conf.baudrate = B600;
-                if (!strcmp("1200", e)) conf.baudrate = B1200;
-                if (!strcmp("2400", e)) conf.baudrate = B2400;
-                if (!strcmp("4800", e)) conf.baudrate = B4800;
-                if (!strcmp("9600", e)) conf.baudrate = B9600;
-                if (!strcmp("19200", e)) conf.baudrate = B19200;
-                if (!strcmp("38400", e)) conf.baudrate = B38400;
-                if (!strcmp("57600", e)) conf.baudrate = B57600;
-                if (!strcmp("115200", e)) conf.baudrate = B115200;
+                else if (!strcmp("600", e)) conf.baudrate = B600;
+                else if (!strcmp("1200", e)) conf.baudrate = B1200;
+                else if (!strcmp("2400", e)) conf.baudrate = B2400;
+                else if (!strcmp("4800", e)) conf.baudrate = B4800;
+                else if (!strcmp("9600", e)) conf.baudrate = B9600;
+                else if (!strcmp("19200", e)) conf.baudrate = B19200;
+                else if (!strcmp("38400", e)) conf.baudrate = B38400;
+                else if (!strcmp("57600", e)) conf.baudrate = B57600;
+                else if (!strcmp("115200", e)) conf.baudrate = B115200;
             }
             if (!strcmp("controller", s)) {
                 free(conf.controller);
@@ -104,20 +108,24 @@ couchdb_conf couchdb_conf_parse() {
 
         char *e, *s = buf;
         s[strlen(s) - 1] = 0;
+
+        /* Remove comments */
         if ((e = index(s, '#'))) *e = 0;
         if ((e = index(s, ';'))) *e = 0;
 
+        /* Trim spaces left */
         while (isspace(*s)) s++;
         if (!*s) continue;
 
         int len = strlen(s) - 1;
+        /* Trim spaces right */
         while (isspace(s[len])) s[len--] = 0;
         if (!*s) continue;
 
         if (s[0] == '[') {
             len = strlen(s);
             if (s[--len] != ']') {
-                printf("Error in couchdb.conf on line %d.\n", line);
+                fprintf(stderr, "Error in couchdb.conf on line %d.\n", line);
                 exit(1);
             }
             s[len] = 0;
@@ -131,7 +139,7 @@ couchdb_conf couchdb_conf_parse() {
     if (database) free(database);
     fclose(f);
 
-    if (!conf.docc) printf("Warning: No documents defined.\n");
+    if (!conf.docc) fprintf(stderr, "Warning: No documents defined.\n");
     return conf;
 }
 

@@ -12,8 +12,7 @@
 #include "config.h"
 
 int main(int argc, char *argv[]) {
-    int argn = 0;
-    while (++argn < argc) {
+    for (int argn = 0; ++argn < argc;) {
         if (!strcmp(argv[argn], "--version")) {
             printf("haklab-status %s %s\n", VERSION, GIT_VERSION);
             exit(0);
@@ -49,25 +48,30 @@ int main(int argc, char *argv[]) {
 
     puts("Listening...");
     while (1) {
-        char buf[255];
+        const int bufsize = 255;
+        char buf[bufsize];
         char timestr[11], *namestr;
-        int len;
-        int count = read(fd, buf, 255);
+        int count = read(fd, buf, bufsize);
         if (!count) break;
+        if (buf[count - 1] != '\n') {
+            fprintf(stderr, "Warning: Ignoring a long line.\n");
+            while (count && buf[count - 1] != '\n') {
+                count = read(fd, buf, bufsize);
+            }
+            if (count) continue; else break;
+        }
         buf[count - 1] = 0;
-        printf("%s\n", buf);
+        puts(buf);
 
-        int i = -1;
-        while (++i < cconf.docc) {
-            len = strlen(cconf.doc[i].id);
-            if (!strncmp(buf, cconf.doc[i].id, len - 1) && buf[len] == '\t') {
-                buf[len] = 0;
-                asprintf(&namestr, "\"%s\"", buf);
-                buf[len] = '\t';
+        /* <NAME>\t<VALUE>\n */
+        for (int i = -1; ++i < cconf.docc;) {
+            int len = strlen(cconf.doc[i].id);
+            if (!strncmp(buf, cconf.doc[i].id, len - 1) && buf[len++] == '\t') {
+                asprintf(&namestr, "\"%s\"", cconf.doc[i].id);
                 cconf.doc[i].add_field(&cconf.doc[i], "name", namestr);
                 free(namestr);
 
-                cconf.doc[i].add_field(&cconf.doc[i], "value", buf + len + 1);
+                cconf.doc[i].add_field(&cconf.doc[i], "value", buf + len);
 
                 snprintf(timestr, 11, "%d", (int)time(0));
                 cconf.doc[i].add_field(&cconf.doc[i], "time", timestr);
