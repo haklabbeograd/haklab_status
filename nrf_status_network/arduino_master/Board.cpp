@@ -1,7 +1,7 @@
 /*
 *   This program is free software; you can redistribute it and/or
 *   modify it under the terms of the GNU General Public License
-*   version 2 as published by the Free Software Foundation.  
+*   version 2 as published by the Free Software Foundation.
 */
 
 #include "Board.h"
@@ -18,7 +18,7 @@ unsigned char nSenActs = 0;
 unsigned char nFreeCH=0;
 unsigned char nextFreeCH = 0;
 
-// Set up nRF24L01 radio on SPI bus plus pins 9 & 10 
+// Set up nRF24L01 radio on SPI bus plus pins 9 & 10
 RF24 radio(9,10);
 
 // Radio pipe addresses for the 2 nodes to communicate.
@@ -37,7 +37,7 @@ void initialiseBoard()
     radio.openWritingPipe(pipes[0]);
     radio.openReadingPipe(1,pipes[1]);
     radio.startListening();
-    
+
 }
 
 /****************************************************************************/
@@ -47,18 +47,18 @@ void mapFreeCH()
     radio.setAutoAck(false);
     radio.startListening();
     radio.stopListening();
-    
+
     for( int i = 30; i< 127; i++)
     {
         radio.setChannel(i);
         radio.startListening();
         delay(25);
         radio.stopListening();
-        
+
         if ( !radio.testCarrier() )
         {
             freeCH[nFreeCH++] = i;
-        }        
+        }
     }
     radio.setAutoAck(true);
     radio.startListening();
@@ -141,10 +141,10 @@ boolean readSensorB(SenAct * theSenAct)
 boolean readAllSonBoard(Board * theBoard)
 {
     radio.stopListening();
-    
+
     radio.setChannel(theBoard->channel);
     //Serial.println((char*)theBoard->name);
-    //Serial.println(theBoard->channel); 
+    //Serial.println(theBoard->channel);
     radio.startListening();
     for(int i =0;i < theBoard->nSenAct; i++)
     {
@@ -159,10 +159,10 @@ boolean readAllSonBoard(Board * theBoard)
 boolean readAllSwIntonBoard(Board * theBoard)
 {
     radio.stopListening();
-    
+
     radio.setChannel(theBoard->channel);
     //Serial.println((char*)theBoard->name);
-    //Serial.println(theBoard->channel); 
+    //Serial.println(theBoard->channel);
     radio.startListening();
     for(int i =0;i < theBoard->nSenAct; i++)
     {
@@ -192,15 +192,15 @@ boolean readPackage(void * package,unsigned char len)
     while ( ! radio.available() && ! timeout )
       if (millis() - started_waiting_at > 1000 )
         timeout = true;
-        
+
     if(!timeout)
     {
         timeout = !radio.read(package, len);
     }
     //else Serial.println("\nTimeout fail");
     return !timeout;
-           
-} 
+
+}
 
 /****************************************************************************/
 
@@ -228,7 +228,7 @@ boolean readPackageAck(byte * package, unsigned char len, byte * ack, unsigned c
 void packBoard(Board theBoard, byte * package)
 {
   int i =0;
-                  
+
   for(i = 0; i < SIZE_OF_NAME; i++)package[i] = (byte) theBoard.name[i];
   package[i]=(byte)theBoard.nSenAct;
 }
@@ -249,7 +249,7 @@ void unpackBoard(Board* theBoard, byte * package)
     theBoard->nSenAct = (unsigned char)package[SIZE_OF_NAME];
     //Serial.print("Number of Sensors/Actuators: ");
     //Serial.print(theBoard->nSenAct);
-    
+
 }
 
 /****************************************************************************/
@@ -301,7 +301,7 @@ boolean newBoardAvailable()
         radio.stopListening();
         radio.setChannel( APPLICATION_CH );
         radio.startListening();
-        
+
         if(readPackage(newBoardPacked, 32))
         {
             if(writePackage(newBoardPacked, 32))return true;
@@ -315,7 +315,7 @@ boolean newBoardAvailable()
         {
             //Serial.println("\nError: no New Board");
             return false;
-        }       
+        }
     }
     else
     {
@@ -332,7 +332,7 @@ boolean newBoardConnect()
     radio.stopListening();
     radio.setChannel( DEFINITION_CH );
     radio.startListening();
-    
+
     if(readPackageAck(package,1,&k,1))
     {
         unpackBoard(&Boards[nBoards],newBoardPacked);
@@ -354,11 +354,11 @@ boolean newBoardDefine()
     int index;
     if(alreadyRegistared(&Boards[nBoards],&index))
         return returnBoardToNetwork(&Boards[nBoards],index);
-        
+
     unsigned char tempNsenAct = nSenActs;
-        
+
     for(int i =0; i< Boards[nBoards].nSenAct; i++)
-    {    
+    {
         k=i;
         if(writePackage(&k, 1))
         {
@@ -374,7 +374,7 @@ boolean newBoardDefine()
                 nSenActs = tempNsenAct;
                 Serial.println("\nError in reading Senact pack");
                 return false;
-            }                            
+            }
         }
         else
         {
@@ -397,9 +397,9 @@ boolean newBoardDefine()
                     Boards[nBoards].channel = freeCH[nextFreeCH];
                     //Serial.println("\nfree Chanell: ");
                     //Serial.print(freeCH[nextFreeCH],DEC);
-                    
+
                     nFreeCH=nFreeCH-4;
-                    nextFreeCH=nextFreeCH+4;                    
+                    nextFreeCH=nextFreeCH+4;
                 }
                 else
                 {
@@ -428,8 +428,8 @@ boolean newBoardDefine()
         Serial.println("\nError in write ch comm");
         return false;
     }
-    
-    
+
+
     //Send connected command
     k=0xff;
     delay(10);
@@ -459,7 +459,7 @@ boolean alreadyRegistared(Board *theBoard, int *index)
         {
             if(theBoard->name[j]!=Boards[i].name[j])found = false;
         }
-        if(found) return true;        
+        if(found) return true;
     }
     return false;
 }
@@ -481,7 +481,7 @@ boolean returnBoardToNetwork(Board *theBoard, int index)
                     //Send connected command
                     k=0xff;
                     delay(10);
-                    if(writePackage(&k, 1)) 
+                    if(writePackage(&k, 1))
                     {
                         //Serial.println("Board reconnected!");
                         return true;
@@ -508,7 +508,7 @@ boolean returnBoardToNetwork(Board *theBoard, int index)
 void listBoardsAndSenActsToSerial(void)
 {
      if(nBoards)
-    {    
+    {
         for(int i = 0; i < nBoards; i++)
         {
             for(int j =0; j < Boards[i].nSenAct; j++)
@@ -524,4 +524,12 @@ void listBoardsAndSenActsToSerial(void)
             }
         }
     }
+}
+
+void changeChannel(byte newC)
+{
+    radio.stopListening();
+
+        radio.setChannel(newC);
+        radio.startListening();
 }
