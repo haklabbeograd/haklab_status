@@ -50,7 +50,6 @@ int main(int argc, char *argv[]) {
     while (1) {
         const int bufsize = 255;
         char buf[bufsize];
-        char timestr[11], *namestr;
         int count = read(fd, buf, bufsize);
         if (!count) break;
         if (buf[count - 1] != '\n') {
@@ -67,11 +66,15 @@ int main(int argc, char *argv[]) {
         for (int i = -1; ++i < cconf.docc;) {
             int len = strlen(cconf.doc[i].id);
             if (!strncmp(buf, cconf.doc[i].id, len - 1) && buf[len++] == '\t') {
+                char timestr[11], *namestr, *valuestr;
+
                 asprintf(&namestr, "\"%s\"", cconf.doc[i].id);
                 cconf.doc[i].add_field(&cconf.doc[i], "name", namestr);
                 free(namestr);
 
-                cconf.doc[i].add_field(&cconf.doc[i], "value", buf + len);
+                asprintf(&valuestr, "\"%s\"", buf + len);
+                cconf.doc[i].add_field(&cconf.doc[i], "value", valuestr);
+                free(valuestr);
 
                 snprintf(timestr, 11, "%d", (int)time(0));
                 cconf.doc[i].add_field(&cconf.doc[i], "time", timestr);

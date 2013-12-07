@@ -8,6 +8,7 @@
 ; Example:
 ;
 ; [http://username:password@localhost:5984/haklab_status] # Database
+; Register
 ; Temperature
 ; Humidity
 ;
