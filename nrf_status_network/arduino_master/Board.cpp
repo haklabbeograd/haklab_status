@@ -515,11 +515,11 @@ void listBoardsAndSenActsToSerial(void)
             {
                 Serial.print("\nRegister\t");
                 Serial.print(Boards[i].name);
-                Serial.print("\t");
+                Serial.print(" ");
                 Serial.print(i);
-                Serial.print("\t");
+                Serial.print(" ");
                 Serial.print((Boards[i].arraySenAct+j)->name);
-                Serial.print("\t");
+                Serial.print(" ");
                 Serial.println(j);
             }
         }
@@ -530,6 +530,6 @@ void changeChannel(byte newC)
 {
     radio.stopListening();
 
-        radio.setChannel(newC);
-        radio.startListening();
+    radio.setChannel(newC);
+    radio.startListening();
 }

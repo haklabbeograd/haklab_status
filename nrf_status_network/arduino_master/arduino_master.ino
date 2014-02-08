@@ -77,23 +77,45 @@ void loop()
                     readAllSonBoard(&(Boards[i]));
                     delay(250);
                 }
-            delay(2500);
+            delay(250);
+            //delay(2500);
             }
         }
     }
-    //Reads through all the boards and their sensors
-    /*if(nBoards)
+    //Reads through all the boards that are interrupt based. 
+    if(nBoards)
 
     {
         //Serial.println("\nentered readout");
         for(int i = 0; i < nBoards; i++)
         {
-            //readAllSwIntonBoard(&(Boards[i]));
-            readAllSonBoard(&(Boards[i]));
-            delay(250);
+          for(int j = 0; j <  Boards[i].nSenAct; j++)
+          {
+            if(Boards[i].arraySenAct[j].reqOrInt == INTERRUPT)
+            {
+              changeChannel(Boards[i].channel);
+              
+              byte temp = Boards[i].arraySenAct[j].lastReading[0];
+              
+              if(writePackage(&(Boards[i].arraySenAct[j].nSA),1))
+              {
+                if(readPackage( &(Boards[i].arraySenAct[j].lastReading), Boards[i].arraySenAct[j].nData ) )
+                {
+                  if(temp != Boards[i].arraySenAct[j].lastReading[0])
+                  {
+                    Serial.print(Boards[i].arraySenAct[j].name);
+                    Serial.print('\t');
+                    Serial.println((boolean)Boards[i].arraySenAct[j].lastReading[0]);
+                  }
+                }
+              }
+            }
+          }
+          delay(250);
         }
-        delay(2500);
-    }*/
+        delay(250);
+        //delay(2500);
+    }
 
     //Detects new boards on the registration channel
     //If the board is new, adds it to the network
