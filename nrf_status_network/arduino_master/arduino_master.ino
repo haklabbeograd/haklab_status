@@ -91,21 +91,22 @@ void loop()
         {
           for(int j = 0; j <  Boards[i].nSenAct; j++)
           {
-            if(Boards[i].arraySenAct[j].reqOrInt == INTERRUPT)
+            SenAct *sa = &Boards[i].arraySenAct[j];
+            if(sa->reqOrInt == INTERRUPT)
             {
               changeChannel(Boards[i].channel);
               
-              byte temp = Boards[i].arraySenAct[j].lastReading[0];
+              byte temp = sa->lastReading[0];
               
-              if(writePackage(&(Boards[i].arraySenAct[j].nSA),1))
+              if(writePackage(&(sa->nSA),1))
               {
-                if(readPackage( &(Boards[i].arraySenAct[j].lastReading), Boards[i].arraySenAct[j].nData ) )
+                if(readPackage( &(sa->lastReading), sa->nData ) )
                 {
-                  if(temp != Boards[i].arraySenAct[j].lastReading[0])
+                  if(temp != sa->lastReading[0])
                   {
-                    Serial.print(Boards[i].arraySenAct[j].name);
+                    Serial.print(sa->name);
                     Serial.print('\t');
-                    Serial.println((boolean)Boards[i].arraySenAct[j].lastReading[0]);
+                    Serial.println((boolean)sa->lastReading[0]);
                   }
                 }
               }
