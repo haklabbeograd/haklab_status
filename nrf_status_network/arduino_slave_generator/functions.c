@@ -45,7 +45,6 @@ void sensorPack(FILE * fp, FILE * fpArduinoMain, unsigned int nSA )
             fprintf(fp,", 0x%X",0);
             j++;
         }
-        char type[20];
         switch (theSenActs[i].type)
         {
             case 0:
@@ -201,14 +200,28 @@ void writePackAllS(FILE *fp)
     //printf(fp, "// vim:cin:ai:sts=2 sw=2 ft=cpp\n");    
 }
 
-void copyFile(FILE *source, FILE *destination)
+void copyFile(const char *source, const char *destination)
 {
+    FILE *src = fopen(source, "r");
+    if (!src)
+    {
+        perror(source);
+        exit(1);
+    }
+    FILE *dst = fopen(destination, "w");
+    if (!dst)
+    {
+        perror(destination);
+        fclose(src);
+        exit(1);
+    }
+
     char ch;
-    while( ( ch = fgetc(source) ) != EOF )
-      fputc(ch, destination);
+    while( ( ch = fgetc(src) ) != EOF )
+      fputc(ch, dst);
  
    printf("File copied successfully.\n");
  
-   fclose(source);
-   fclose(destination);
+   fclose(src);
+   fclose(dst);
 }

@@ -3,32 +3,21 @@
 
 int main()
 {
-    FILE  *fpArduinoMain,*fpBoardH,*fpBoardC,*fpPrintH,*origArduinoMain,*newBoardH,*newBoardC,*newPrintH, *read_sensors_h;
-    
-    fpBoardH = fopen("input/Board.h","r");
-    newBoardH = fopen("arduino_slave/Board.h","w");
-    copyFile(fpBoardH, newBoardH);
-    
-    fpBoardH = fopen("arduino_slave/Board.h","a++");
-    
-    fpBoardC = fopen("input/Board.cpp","r");
-    newBoardC = fopen("arduino_slave/Board.cpp","w");
-    copyFile(fpBoardC, newBoardC);
-    
-    fpPrintH = fopen("input/printf.h","r");
-    newPrintH = fopen("arduino_slave/printf.h","w");
-    copyFile(fpPrintH, newPrintH);
-    
-    origArduinoMain = fopen("input/arduino_sensor_door.ino","r");
-    fpArduinoMain = fopen("arduino_slave/arduino_slave.ino", "w");
-    copyFile(origArduinoMain, fpArduinoMain);
-    fpArduinoMain = fopen("arduino_slave/arduino_slave.ino", "a+");
-    
-    read_sensors_h = fopen("arduino_slave/helpers.h", "w");\
-            
+    FILE  *fpArduinoMain,*fpBoardH, *read_sensors_h;
+    copyFile("input/Board.h", "arduino_slave/Board.h");
+    copyFile("input/Board.cpp", "arduino_slave/Board.cpp");
+    copyFile("input/printf.h", "arduino_slave/printf.h");
+    copyFile("input/arduino_sensor_door.ino", "arduino_slave/arduino_slave.ino");
+
     BoardGenerate();
+    fpArduinoMain = fopen("arduino_slave/arduino_slave.ino", "a+");
+    if (!fpArduinoMain) return 1;
     fprintf(fpArduinoMain,"byte Value[%d][8];\n",theBoard.nSenAct);
+    fpBoardH = fopen("arduino_slave/Board.h","a++");
+    if (!fpBoardH) return 1;
     fprintf(fpBoardH,"extern byte Value[%d][8];\n",theBoard.nSenAct);
+    read_sensors_h = fopen("arduino_slave/helpers.h", "w");
+    if (!read_sensors_h) return 1;
     boardPack(read_sensors_h);
     sensorPack(read_sensors_h, fpArduinoMain, theBoard.nSenAct );
     fprintf(read_sensors_h,"unsigned char nDataS[%d] = { %d",theBoard.nSenAct,theSenActs[0].nData);    

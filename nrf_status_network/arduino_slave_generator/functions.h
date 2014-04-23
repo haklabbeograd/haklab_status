@@ -73,5 +73,5 @@ void SensorGenerate(int index);
 void printReadFunctionsH(FILE *fp);
 void printReadFunctionsC(FILE *fp);
 void writePackAllS(FILE *fp);
-void copyFile(FILE *source, FILE *destination);
+void copyFile(const char *source, const char *destination);
 #endif
