@@ -7,7 +7,7 @@ This is a plug and play sensor or actuator network based on the Nordic nRF24L01+
 ### Master
 The master automatically detects new sensors or actuators and adds them to the network. The idea is to connect the master board to a PC or a USB capable Router(WR703N) running a script that will request sensor data, and display it on a web interface.
 
-**For PC/Router code visit http://trac.oosm.org/nrf-status.**
+**For PC/Router code visit https://gitorious.org/nrf-status.**
 ### Slave
 The slaves are designed to be as much plug and play as possible. Meaning that very little programing know how is needed to get them running. Code examples and wiring diagrams will be provided for the most common sensors. For sensors that don't have examples, a web interface will be provided where you can input your sensor information, and an Arduno sketch will be generated. The only thing the user will need to do is to code or paste the sensor reading function.
 ### Communication protocol
